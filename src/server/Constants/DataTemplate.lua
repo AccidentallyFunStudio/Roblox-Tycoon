@@ -1,4 +1,0 @@
-return {
-	TemplateData = 1,
-
-}

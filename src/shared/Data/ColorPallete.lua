@@ -1,0 +1,16 @@
+return table.freeze({
+    Gold = Color3.fromRGB(255, 184, 0),
+    DarkBG = Color3.fromRGB(26, 26, 26),
+    RobuxPurple = Color3.fromRGB(130, 65, 245),
+    White = Color3.fromRGB(255, 255, 255),
+    Green = Color3.fromRGB(75, 181, 67),
+    Text = Color3.fromRGB(255, 255, 255),
+    Shop_Yellow = Color3.fromRGB(255, 184, 0),
+    Shop_Orange = Color3.fromRGB(255, 165, 0),
+    Shop_Background_White =  Color3.fromRGB(248, 248, 248),
+    Shop_Background_Blue = Color3.fromRGB(120, 210, 255),
+    Shop_Close = Color3.fromRGB(255, 78, 78),
+    Shop_Price =  Color3.fromRGB(93, 199, 93),
+    Shop_InactiveTab = Color3.fromRGB(180, 180, 180),
+    Shop_Legendary = Color3.fromRGB(255, 100, 0),
+})

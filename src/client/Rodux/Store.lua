@@ -6,6 +6,7 @@ local StarterPlayer = game:GetService("StarterPlayer")
 local Reducers = StarterPlayer.StarterPlayerScripts.Client.Rodux.Reducers
 local TemplateReducer = require(Reducers.TemplateReducer)
 local CoinReducer = require(Reducers.CoinReducer)
+local UIReducer = require(Reducers.UIReducer)
 
 -- Modules
 local Rodux = require(ReplicatedStorage.Packages.Rodux)
@@ -14,6 +15,7 @@ local Rodux = require(ReplicatedStorage.Packages.Rodux)
 local StoreReducer = Rodux.combineReducers({
 	TemplateReducer = TemplateReducer,
 	CoinReducer = CoinReducer,
+	UIReducer = UIReducer,
 })
 
 local Store = Rodux.Store.new(StoreReducer, nil, {})

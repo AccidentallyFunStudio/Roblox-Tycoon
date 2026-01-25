@@ -23,7 +23,6 @@ local Store = require(StarterPlayer.StarterPlayerScripts.Client.Rodux.Store)
 local RoduxHooks = require(ReplicatedStorage.Packages.Roduxhooks)
 
 local HUD = require(Applications.HUD.Application)
-local Coin = require(Applications.Coin.Application)
 
 --local GlobalHoveredFrame = require(Applications.GlobalHoveredFrame.Application)
 

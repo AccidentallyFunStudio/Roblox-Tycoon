@@ -23,6 +23,7 @@ local Store = require(StarterPlayer.StarterPlayerScripts.Client.Rodux.Store)
 local RoduxHooks = require(ReplicatedStorage.Packages.Roduxhooks)
 
 local HUD = require(Applications.HUD.Application)
+local Shop = require(Applications.Shop.Application)
 
 --local GlobalHoveredFrame = require(Applications.GlobalHoveredFrame.Application)
 
@@ -36,7 +37,7 @@ end
 Root = RoactHooks.new(Roact)(Root)
 
 -- Component
-local function GameFrame()
+local function GameFrame(_, hooks)
 	return Roact.createElement(Root, {}, {
 		GameScreenGui = Roact.createElement("ScreenGui", {
 			IgnoreGuiInset = true,
@@ -44,6 +45,7 @@ local function GameFrame()
 			ResetOnSpawn = false,
 		}, {
 			HUD = Roact.createElement(HUD),
+			Shop = Roact.createElement(Shop),
 		}),
 	})
 end

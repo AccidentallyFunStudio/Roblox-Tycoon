@@ -28,7 +28,7 @@ function AudioController:PlayMusic(name : string)
 end
 
 function AudioController:KnitStart()
-    self:PlayMusic("Gameplay")
+    -- self:PlayMusic("Gameplay")
     print("[Audio Controller] Controller started.")
 end
 

@@ -1,4 +1,5 @@
 -- Game Services
+local StarterPlayer = game:GetService("StarterPlayer")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Packages
@@ -6,6 +7,10 @@ local Knit = require(ReplicatedStorage.Packages.Knit)
 local Roact = require(ReplicatedStorage.Packages.Roact)
 local RoactHooks = require(ReplicatedStorage.Packages.Hooks)
 local RoduxHooks = require(ReplicatedStorage.Packages.Roduxhooks)
+
+-- Store
+local Store = require(StarterPlayer.StarterPlayerScripts.Client.Rodux.Store)
+local UIActions = require(StarterPlayer.StarterPlayerScripts.Client.Rodux.Actions.UIActions)
 
 -- Data
 local ColorPallete = require(ReplicatedStorage.Shared.Data.ColorPallete)
@@ -34,6 +39,7 @@ function LeftFrame(_, hooks)
 			LayoutOrder = 1,
 			[Roact.Event.MouseButton1Click] = function()
 				TeleportController:TeleportToShop()
+				Store:dispatch(UIActions.SetCurrentUI("Shop"))
 			end,
 		}, {
 			UICorner = Roact.createElement("UICorner", {

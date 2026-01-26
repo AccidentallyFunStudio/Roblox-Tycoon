@@ -3,7 +3,6 @@ local StarterPlayerScripts = game:GetService("StarterPlayer").StarterPlayerScrip
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Packages
-local Knit = require(ReplicatedStorage.Packages.Knit)
 local Roact = require(ReplicatedStorage.Packages.Roact)
 local RoactHooks = require(ReplicatedStorage.Packages.Hooks)
 local RoduxHooks = require(ReplicatedStorage.Packages.Roduxhooks)
@@ -14,25 +13,22 @@ local UIActions = require(StarterPlayerScripts.Client.Rodux.Actions.UIActions)
 
 -- Data
 local ColorPallete = require(ReplicatedStorage.Shared.Data.ColorPallete)
-local Textures = require(ReplicatedStorage.Shared.Data.Textures.UI)
-local Animals = require(ReplicatedStorage.Shared.Data.Shop.Animals)
 
 -- Components
 local CloseButton = require(StarterPlayerScripts.Client.Roact.Components.CloseButton)
 local TabButton = require(StarterPlayerScripts.Client.Roact.Components.TabButton)
 
 -- Panels
-local EggsPanel = require(StarterPlayerScripts.Client.Roact.Applications.Shop.Panels.EggsPanel)
-local BiomesPanel = require(StarterPlayerScripts.Client.Roact.Applications.Shop.Panels.BiomesPanel)
+local AnimalsPanel = require(StarterPlayerScripts.Client.Roact.Applications.Inventory.Panels.AnimalsPanel)
 
--- Shop
-local function Shop(_, hooks)
+-- Inventory
+local function Inventory(_, hooks)
 	local UIReducer = RoduxHooks.useSelector(hooks, function(state)
 		return state.UIReducer
 	end)
 
 	return Roact.createElement("Frame", {
-		Visible = UIReducer.CurrentUI == "Shop",
+		Visible = UIReducer.CurrentUI == "Inventory",
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.5),
 		Size = UDim2.fromScale(0.7, 0.7),
@@ -53,7 +49,7 @@ local function Shop(_, hooks)
 			Title = Roact.createElement("TextLabel", {
 				Size = UDim2.new(0, 200, 1, 0),
 				Position = UDim2.new(0, 25, 0, 0),
-				Text = "Shop",
+				Text = "Inventory",
 				Font = Enum.Font.FredokaOne,
 				TextSize = 32,
 				TextColor3 = Color3.new(1, 1, 1),
@@ -81,24 +77,12 @@ local function Shop(_, hooks)
 				FillDirection = Enum.FillDirection.Horizontal,
 				HorizontalAlignment = Enum.HorizontalAlignment.Center,
 				Padding = UDim.new(0, 15),
-				SortOrder = Enum.SortOrder.LayoutOrder,
 			}),
 
-			EggsTab = Roact.createElement(TabButton, {
-				Label = "Eggs",
-				Value = "Eggs",
-				Active = UIReducer.CurrentTab == "Eggs",
-				LayoutOrder = 1,
-				OnClick = function(value)
-					Store:dispatch(UIActions.SetCurrentTab(value))
-				end,
-			}),
-
-			BiomesTab = Roact.createElement(TabButton, {
-				Label = "Biomes",
-				Value = "Biomes",
-				Active = UIReducer.CurrentTab == "Biomes",
-				LayoutOrder = 2,
+			AnimalsTab = Roact.createElement(TabButton, {
+				Label = "Animals",
+				Value = "Animals",
+				Active = UIReducer.CurrentTab == "Animals",
 				OnClick = function(value)
 					Store:dispatch(UIActions.SetCurrentTab(value))
 				end,
@@ -107,23 +91,18 @@ local function Shop(_, hooks)
 
 		-- Content
 		Content = Roact.createElement("Frame", {
-			AnchorPoint = Vector2.new(0.5, 0),
+            AnchorPoint = Vector2.new(0.5, 0),
 			Position = UDim2.new(0.5, 0, 0, 140),
 			Size = UDim2.new(1, -60, 1, -140),
 			BackgroundTransparency = 1,
 			BorderSizePixel = 0,
 		}, {
-			EggsPanel = Roact.createElement(EggsPanel, {
-				Visible = UIReducer.CurrentTab == "Eggs",
+			AnimalsPanel = Roact.createElement(AnimalsPanel, {
+				Visible = UIReducer.CurrentTab == "Animals",
 			}),
-			BiomesPanel = Roact.createElement(BiomesPanel,
-				{
-					Visible = UIReducer.CurrentTab == "Biomes",
-				}
-			),
 		}),
 	})
 end
 
-Shop = RoactHooks.new(Roact)(Shop)
-return Shop
+Inventory = RoactHooks.new(Roact)(Inventory)
+return Inventory

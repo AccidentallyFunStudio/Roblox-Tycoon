@@ -24,6 +24,7 @@ local RoduxHooks = require(ReplicatedStorage.Packages.Roduxhooks)
 
 local HUD = require(Applications.HUD.Application)
 local Shop = require(Applications.Shop.Application)
+local Inventory = require(Applications.Inventory.Application)
 
 --local GlobalHoveredFrame = require(Applications.GlobalHoveredFrame.Application)
 
@@ -46,6 +47,7 @@ local function GameFrame(_, hooks)
 		}, {
 			HUD = Roact.createElement(HUD),
 			Shop = Roact.createElement(Shop),
+			Inventory = Roact.createElement(Inventory),
 		}),
 	})
 end

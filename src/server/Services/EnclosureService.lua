@@ -11,8 +11,9 @@ local EnclosureService = Knit.CreateService {
 -- Folder containing all Enclosure instances in the world.
 local EnclosuresFolder = Workspace:WaitForChild("Gameplay"):WaitForChild("Scripts"):WaitForChild("Enclosures")
 
--- Reference to CoinService
+-- Knit Services
 local CoinService = nil
+local DataService = nil
 
 -- Cached list of Enclosures for faster iteration.
 -- This avoids repeated calls to GetChildren during runtime loops.
@@ -124,8 +125,8 @@ end
 -- || Knit Lifecycle || --
 
 function EnclosureService:KnitStart()
-    -- Resolve dependent services
     CoinService = Knit.GetService("CoinService")
+    DataService = Knit.GetService("DataService")
 
     -- Cache all enclosures present in the world
     for _, enclosure in ipairs(EnclosuresFolder:GetChildren()) do

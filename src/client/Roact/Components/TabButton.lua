@@ -15,6 +15,7 @@ local function TabButton(props, hooks)
 		[Roact.Event.MouseButton1Click] = function()
 			props.OnClick(props.Value)
 		end,
+        LayoutOrder = props.LayoutOrder or 0,
 	}, {
 		UICorner = Roact.createElement("UICorner", { CornerRadius = UDim.new(0, 10) }),
         UIStroke = Roact.createElement("UIStroke",

@@ -13,6 +13,10 @@ local UIActions = {
 	ResetCurrentUI = Rodux.makeActionCreator("ResetCurrentUI", function(value)
 		return { value = value }
 	end),
+
+	SetCurrentTab = Rodux.makeActionCreator("SetCurrentTab", function(value)
+		return { value = value }
+	end),
 }
 
 return UIActions

@@ -40,6 +40,7 @@ function LeftFrame(_, hooks)
 			[Roact.Event.MouseButton1Click] = function()
 				TeleportController:TeleportToShop()
 				Store:dispatch(UIActions.SetCurrentUI("Shop"))
+				Store:dispatch(UIActions.SetCurrentTab("Eggs"))
 			end,
 		}, {
 			UICorner = Roact.createElement("UICorner", {
@@ -102,13 +103,49 @@ function LeftFrame(_, hooks)
 			}),
 		}),
 
-		MyZooButton = Roact.createElement("ImageButton", {
+		InventoryButton = Roact.createElement("ImageButton", {
 			Size = UDim2.new(0, 65, 0, 65),
 			BackgroundColor3 = ColorPallete.White,
 			LayoutOrder = 3,
 			[Roact.Event.MouseButton1Click] = function()
+				Store:dispatch(UIActions.SetCurrentUI("Inventory"))
+				Store:dispatch(UIActions.SetCurrentTab("Animals"))
+				print("Inventory Button Clicked!")
+			end,
+		}, {
+			UICorner = Roact.createElement("UICorner", {
+				CornerRadius = UDim.new(0, 10),
+			}),
+			UIStroke = Roact.createElement("UIStroke", {
+				Color = ColorPallete.Gold,
+				Thickness = 4,
+			}),
+			InventoryIcon = Roact.createElement("ImageLabel", {
+				Size = UDim2.new(0, 45, 0, 45),
+				Position = UDim2.new(0.5, 0, 0.5, -7),
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Image = Textures.Inventory,
+				BackgroundTransparency = 1,
+			}),
+			InventoryLabel = Roact.createElement("TextLabel", {
+				Size = UDim2.new(1, 0, 0, 20),
+				Position = UDim2.new(0.5, 0, 1, -20),
+				AnchorPoint = Vector2.new(0.5, 0),
+				Text = "Inventory",
+				TextColor3 = ColorPallete.Gold,
+				Font = Enum.Font.GothamBold,
+				TextSize = 14,
+				BackgroundTransparency = 1,
+			}),
+		}),
+
+		MyZooButton = Roact.createElement("ImageButton", {
+			Size = UDim2.new(0, 65, 0, 65),
+			BackgroundColor3 = ColorPallete.White,
+			LayoutOrder = 4,
+			[Roact.Event.MouseButton1Click] = function()
 				TeleportController:TeleportToEnclosure()
-				print("My Zoo Button Clicked!")
+				Store:dispatch(UIActions.ResetCurrentUI())
 			end,
 		}, {
 			UICorner = Roact.createElement("UICorner", {

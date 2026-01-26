@@ -1,34 +1,43 @@
-local Knit = require(game.ReplicatedStorage.Packages.Knit)
+-- Game Services
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+-- Packages
+local Knit = require(ReplicatedStorage.Packages.Knit)
+
+-- Knit Services
+local DataService
+
+-- CoinService
 local CoinService = Knit.CreateService({
-    Name = "CoinService",
-    Client = {
-        CoinsChanged = Knit.CreateSignal(),
-    },
+	Name = "CoinService",
+	Client = {
+		CoinsChanged = Knit.CreateSignal(),
+	},
 })
 
-local playerCoins = {}
+function CoinService:AddCoins(player: Player, amount: number)
+	if amount <= 0 then return end
 
-function CoinService:AddCoins(player : Player, amount : number)
-    local userId = player.UserId
-    playerCoins[userId] = (playerCoins[userId] or 0) + amount
-    self.Client.CoinsChanged:Fire(player, playerCoins[userId])
+	local data = DataService:GetData(player)
+	if not data then return end
 
-    print(`[Coin Service] Added {amount} coins to Player {player.Name}. Total now: {playerCoins[userId]}`)
+	data.Gold += amount
+	self.Client.CoinsChanged:Fire(player, data.Gold)
+
+	print(`[CoinService] +{amount} Gold → {player.Name} (Total: {data.Gold})`)
 end
 
-function CoinService:GetCoins(player : Player) : number
-    return playerCoins[player.UserId] or 0
+function CoinService:GetCoins(player: Player): number
+	local data = DataService:GetData(player)
+	return data and data.Gold or 0
 end
 
 -- || Knit Lifecycle || --
 
 function CoinService:KnitStart()
-   game.Players.PlayerRemoving:Connect(function(player)
-       playerCoins[player.UserId] = nil
-   end) 
+	DataService = Knit.GetService("DataService")
 
-   print(`[Coin Service] Service started.`)
+	print(`[Coin Service] Service started.`)
 end
 
 return CoinService

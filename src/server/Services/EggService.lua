@@ -45,7 +45,7 @@ function EggService:BuyEgg(player: Player, eggType: string)
 	-- Notify client
 	DataService.Client.DataChanged:Fire(player, {
 	Gold = data.Gold,
-	EggPurchased = eggType,
+	Eggs = data.Eggs
 })
 
 	return true

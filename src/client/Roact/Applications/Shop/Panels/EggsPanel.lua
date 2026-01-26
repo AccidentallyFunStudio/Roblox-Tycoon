@@ -17,7 +17,6 @@ local EggCard = require(StarterPlayerScripts.Client.Roact.Components.Cards.EggCa
 
 function EggsPanel(props, hooks)
 	local eggList = {}
-
 	for _, egg in pairs(Eggs) do
 		table.insert(eggList, egg)
 	end
@@ -26,8 +25,11 @@ function EggsPanel(props, hooks)
 		return a.LayoutOrder < b.LayoutOrder
 	end)
 
-	local eggCards = {}
+	local eggsState = RoduxHooks.useSelector(hooks, function(state)
+		return state.EggReducer.Eggs
+	end)
 
+	local eggCards = {}
 	for _, egg in ipairs(eggList) do
 		eggCards[egg.Id] = Roact.createElement(EggCard, {
 			Id = egg.Id,
@@ -35,6 +37,7 @@ function EggsPanel(props, hooks)
 			Description = egg.Description,
 			Price = egg.Price,
 			Image = egg.Image,
+			Owned = eggsState[egg.Id] or 0,
 			LayoutOrder = egg.LayoutOrder,
 		})
 	end

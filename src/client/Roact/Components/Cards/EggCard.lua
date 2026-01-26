@@ -7,7 +7,7 @@ local ColorPallete = require(ReplicatedStorage.Shared.Data.ColorPallete)
 local BaseCard = require(script.Parent.BaseCard)
 
 local function EggCard(props)
-    local EggController = Knit.GetController("EggController")
+	local EggController = Knit.GetController("EggController")
 
 	return Roact.createElement(BaseCard, nil, {
 		Image = Roact.createElement("ImageLabel", {
@@ -18,7 +18,7 @@ local function EggCard(props)
 			BackgroundTransparency = 1,
 		}),
 
-		Name = Roact.createElement("TextLabel", {
+		NameText = Roact.createElement("TextLabel", {
 			Position = UDim2.new(0, 5, 0.55, 0),
 			Size = UDim2.new(1, -12, 0, 28),
 			Text = props.Name,
@@ -26,6 +26,16 @@ local function EggCard(props)
 			TextSize = 18,
 			TextColor3 = ColorPallete.DarkBG,
 			BackgroundTransparency = 1,
+		}),
+
+		OwnedText = Roact.createElement("TextLabel", {
+			Position = UDim2.new(0, 5, 0.65, 0),
+			Size = UDim2.new(1, -12, 0, 28),
+			Text = `Owned: {props.Owned or 0}`,
+			Font = Enum.Font.FredokaOne,
+			TextSize = 18,
+			TextColor3 = ColorPallete.DarkBG,
+			BackgroundTransparency = 1
 		}),
 
 		Buy = Roact.createElement("ImageButton", {
@@ -45,7 +55,7 @@ local function EggCard(props)
 				Font = Enum.Font.FredokaOne,
 				TextSize = 18,
 				BackgroundTransparency = 1,
-                TextColor3 = ColorPallete.Text
+				TextColor3 = ColorPallete.Text,
 			}),
 		}),
 	})

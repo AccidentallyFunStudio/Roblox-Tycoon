@@ -3,7 +3,7 @@ return table.freeze({
         Id = "Biome_Forest",
         Name = "Forest",
         Description = "A lush biome filled with trees and wildlife.",
-        Image = "",
+        Image = "rbxassetid://125402974315589",
         LayoutOrder = 1,
         MaxLevel = 3,
         Upgrades = {
@@ -16,7 +16,7 @@ return table.freeze({
         Id = "Biome_Prehistoric",
         Name = "Prehistoric",
         Description = "Step back in time to an era of dinosaurs and ancient flora.",
-        Image = "",
+        Image = "rbxassetid://138423497808177",
         LayoutOrder = 2,
         MaxLevel = 3,
         Upgrades = {
@@ -29,7 +29,7 @@ return table.freeze({
         Id = "Biome_Olympus",
         Name = "Olympus",
         Description = "A mythical biome inspired by ancient Greek legends.",
-        Image = "",
+        Image = "rbxassetid://87593112772697",
         LayoutOrder = 3,
         MaxLevel = 3,
         Upgrades = {

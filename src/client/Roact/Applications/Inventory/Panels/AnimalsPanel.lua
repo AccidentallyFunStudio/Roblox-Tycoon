@@ -24,6 +24,7 @@ function AnimalsPanel(props, hooks)
 			Name = animal.Name,
 			Price = animal.Price,
 			Biome = animal.Biome,
+            Image = animal.Image,
 		})
 	end
 

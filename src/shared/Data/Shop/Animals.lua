@@ -6,7 +6,7 @@ return table.freeze({
 		Biome = "Forest",
 		GoldProduction = 1,
 		Probability = "20%",
-		Image = "",
+		Image = "rbxassetid://97808348618703",
 	},
 
 	{
@@ -16,7 +16,7 @@ return table.freeze({
 		Biome = "Forest",
 		GoldProduction = 2,
 		Probability = "15%",
-		Image = "",
+		Image = "rbxassetid://77562928363387",
 	},
 
 	{
@@ -26,7 +26,7 @@ return table.freeze({
 		Biome = "Prehistoric",
 		GoldProduction = 3,
 		Probability = "12%",
-		Image = "",
+		Image = "rbxassetid://129832804086613",
 	},
 
 	{
@@ -36,7 +36,7 @@ return table.freeze({
 		Biome = "Prehistoric",
 		GoldProduction = 4,
 		Probability = "10%",
-		Image = "",
+		Image = "rbxassetid://103873825726555",
 	},
 
 	{
@@ -66,7 +66,7 @@ return table.freeze({
 		Biome = "Forest",
 		GoldProduction = 5,
 		Probability = "9%",
-		Image = "",
+		Image = "rbxassetid://123705524188115",
 	},
 
 	{
@@ -76,7 +76,7 @@ return table.freeze({
 		Biome = "Forest",
 		GoldProduction = 8,
 		Probability = "8%",
-		Image = "",
+		Image = "rbxassetid://115909403839971",
 	},
 
 	{
@@ -86,17 +86,17 @@ return table.freeze({
 		Biome = "Prehistoric",
 		GoldProduction = 10,
 		Probability = "7%",
-		Image = "",
+		Image = "rbxassetid://130030473802224",
 	},
 
 	{
-		Id = "Animal_Triceratops",
-		Name = "Triceratops",
+		Id = "Animal_Stegosaurus",
+		Name = "Stegosaurus",
 		Rarity = "Epic",
 		Biome = "Prehistoric",
 		GoldProduction = 12,
 		Probability = "4.5%",
-		Image = "",
+		Image = "rbxassetid://109018460046652",
 	},
 
 	{
@@ -116,17 +116,17 @@ return table.freeze({
 		Biome = "Forest",
 		GoldProduction = 20,
 		Probability = "2%",
-		Image = "",
+		Image = "rbxassetid://136052225897847",
 	},
 
 	{
 		Id = "Animal_Chimera",
-		Name = "Hydra",
+		Name = "Chimera",
 		Rarity = "Legendary",
 		Biome = "Prehistoric",
 		GoldProduction = 23,
 		Probability = "1.5%",
-		Image = "",
+		Image = "rbxassetid://121779358180577",
 	},
 
 	{

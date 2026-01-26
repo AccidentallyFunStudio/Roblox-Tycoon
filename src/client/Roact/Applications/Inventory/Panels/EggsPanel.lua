@@ -9,22 +9,41 @@ local RoduxHooks = require(ReplicatedStorage.Packages.Roduxhooks)
 
 -- Data
 local ColorPallete = require(ReplicatedStorage.Shared.Data.ColorPallete)
-local Biomes = require(ReplicatedStorage.Shared.Data.Shop.Biomes)
+local Eggs = require(ReplicatedStorage.Shared.Data.Shop.Eggs)
 
 -- Components
-local ItemCard = require(StarterPlayerScripts.Client.Roact.Components.ItemCard)
-local BiomeCard = require(StarterPlayerScripts.Client.Roact.Components.Cards.BiomeCard)
+local EggCard = require(StarterPlayerScripts.Client.Roact.Components.Cards.EggCard)
 
-function BiomesPanel(props, hooks)
-	local biomeCards = {}
+function EggsPanel(props, hooks)
+	local eggList = {}
+	for _, egg in pairs(Eggs) do
+		table.insert(eggList, egg)
+	end
 
-	for _, item in ipairs(Biomes) do
-		biomeCards[item.Id] = Roact.createElement(BiomeCard, {
-			Name = item.Name,
-			Description = item.Description,
-			Price = item.Upgrades[1].Cost,
-            LayoutOrder = item.LayoutOrder,
-			Image = item.Image,
+	table.sort(eggList, function(a, b)
+		return a.LayoutOrder < b.LayoutOrder
+	end)
+
+	local eggsState = RoduxHooks.useSelector(hooks, function(state)
+		return state.EggReducer.Eggs
+	end)
+
+	local eggCards = {}
+	for _, egg in ipairs(eggList) do
+		eggCards[egg.Id] = Roact.createElement(EggCard, {
+			Id = egg.Id,
+			Name = egg.Name,
+			Description = egg.Description,
+			Price = egg.Price,
+			Image = egg.Image,
+			Owned = eggsState[egg.Id] or 0,
+			LayoutOrder = egg.LayoutOrder,
+            Action = {
+                Label = `Hatch`,
+		        OnClick = function()
+			    print(`{egg.Name} hatched.`)
+		end,
+            }
 		})
 	end
 
@@ -44,12 +63,12 @@ function BiomesPanel(props, hooks)
 			CellSize = UDim2.fromOffset(180, 220),
 			CellPadding = UDim2.fromOffset(16, 16),
 			HorizontalAlignment = Enum.HorizontalAlignment.Center,
-            SortOrder = Enum.SortOrder.LayoutOrder,
+			SortOrder = Enum.SortOrder.LayoutOrder,
 		}),
 
-		Items = Roact.createFragment(biomeCards),
+		Items = Roact.createFragment(eggCards),
 	})
 end
 
-BiomesPanel = RoactHooks.new(Roact)(BiomesPanel)
-return BiomesPanel
+EggsPanel = RoactHooks.new(Roact)(EggsPanel)
+return EggsPanel

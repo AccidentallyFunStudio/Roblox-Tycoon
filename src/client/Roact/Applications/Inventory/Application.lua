@@ -20,6 +20,7 @@ local TabButton = require(StarterPlayerScripts.Client.Roact.Components.TabButton
 
 -- Panels
 local AnimalsPanel = require(StarterPlayerScripts.Client.Roact.Applications.Inventory.Panels.AnimalsPanel)
+local EggsPanel = require(StarterPlayerScripts.Client.Roact.Applications.Inventory.Panels.EggsPanel)
 
 -- Inventory
 local function Inventory(_, hooks)
@@ -87,6 +88,15 @@ local function Inventory(_, hooks)
 					Store:dispatch(UIActions.SetCurrentTab(value))
 				end,
 			}),
+
+			EggsTab = Roact.createElement(TabButton, {
+				Label = "Eggs",
+				Value = "Eggs",
+				Active = UIReducer.CurrentTab == "Eggs",
+				OnClick = function(value)
+					Store:dispatch(UIActions.SetCurrentTab(value))
+				end
+			})
 		}),
 
 		-- Content
@@ -100,6 +110,10 @@ local function Inventory(_, hooks)
 			AnimalsPanel = Roact.createElement(AnimalsPanel, {
 				Visible = UIReducer.CurrentTab == "Animals",
 			}),
+
+			EggsPanel = Roact.createElement(EggsPanel, {
+				Visible = UIReducer.CurrentTab == "Eggs"
+			})
 		}),
 	})
 end

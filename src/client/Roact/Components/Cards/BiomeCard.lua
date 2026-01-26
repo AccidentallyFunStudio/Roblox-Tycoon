@@ -6,7 +6,7 @@ local RoactHooks = require(ReplicatedStorage.Packages.Hooks)
 local BaseCard = require(script.Parent.BaseCard)
 local ColorPallete = require(ReplicatedStorage.Shared.Data.ColorPallete)
 
-local function AnimalCard(props, hooks)
+local function BiomeCard(props, hooks)
 	return Roact.createElement(BaseCard, {
 		LayoutOrder = props.LayoutOrder,
 	}, {
@@ -28,16 +28,6 @@ local function AnimalCard(props, hooks)
 			BackgroundTransparency = 1,
 		}),
 
-		Biome = Roact.createElement("TextLabel", {
-			Position = UDim2.new(0, 5, 0.65, 0),
-			Size = UDim2.new(1, -12, 0, 24),
-			Text = `Biome: {props.Biome}`,
-			Font = Enum.Font.FredokaOne,
-			TextSize = 16,
-			TextColor3 = ColorPallete.DarkBG,
-			BackgroundTransparency = 1,
-		}),
-
 		Buy = Roact.createElement("ImageButton", {
 			Size = UDim2.new(1, -16, 0, 34),
 			Position = UDim2.new(0, 8, 1, -42),
@@ -55,9 +45,10 @@ local function AnimalCard(props, hooks)
 				Font = Enum.Font.FredokaOne,
 				TextSize = 18,
 				BackgroundTransparency = 1,
+                TextColor3 = ColorPallete.Text
 			}),
 		}),
 	})
 end
 
-return RoactHooks.new(Roact)(AnimalCard)
+return RoactHooks.new(Roact)(BiomeCard)

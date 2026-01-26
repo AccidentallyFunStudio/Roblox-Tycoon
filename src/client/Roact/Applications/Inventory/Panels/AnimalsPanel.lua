@@ -13,16 +13,17 @@ local Animals = require(ReplicatedStorage.Shared.Data.Shop.Animals)
 
 -- Components
 local ItemCard = require(StarterPlayerScripts.Client.Roact.Components.ItemCard)
+local AnimalCard = require(StarterPlayerScripts.Client.Roact.Components.Cards.AnimalCard)
 
 function AnimalsPanel(props, hooks)
 	local animalCards = {}
 
-	for _, item in ipairs(Animals) do
-		animalCards[item.Id] = Roact.createElement(ItemCard, {
-			Id = item.Id,
-			Name = item.Name,
-			Price = item.Price,
-			Biome = item.Biome,
+	for _, animal in ipairs(Animals) do
+		animalCards[animal.Id] = Roact.createElement(AnimalCard, {
+			Id = animal.Id,
+			Name = animal.Name,
+			Price = animal.Price,
+			Biome = animal.Biome,
 		})
 	end
 

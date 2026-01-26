@@ -4,18 +4,18 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- Packages
 local Knit = require(ReplicatedStorage.Packages.Knit)
 
+-- Knit Services
+local CoinService
 local DataService
 
 -- Data
 local DataFolder = ReplicatedStorage.Shared.Data
-local Eggs = DataFolder.Shop.Eggs
+local Eggs = require(DataFolder.Shop.Eggs)
 
 -- Egg Service
 local EggService = Knit.CreateService({
 	Name = "EggService",
-	Client = {
-        BuyEgg = Knit.CreateSignal();
-    },
+	Client = {},
 })
 
 -- || Functions || --
@@ -42,17 +42,26 @@ function EggService:BuyEgg(player: Player, eggType: string)
 	-- 🥚 Add egg
 	data.Eggs[eggType] = (data.Eggs[eggType] or 0) + 1
 
-	-- Notify data change
-	DataService.DataChanged:Fire(player, "Gold", data.Gold)
-	DataService.DataChanged:Fire(player, "Eggs", eggType)
+	-- Notify client
+	DataService.Client.DataChanged:Fire(player, {
+	Gold = data.Gold,
+	EggPurchased = eggType,
+})
 
 	return true
+end
+
+-- || Client Functions || --
+
+function EggService.Client:BuyEgg(player : Player, id : string)
+	return self.Server:BuyEgg(player, id)
 end
 
 
 -- || Knit Lifecycle || --
 
 function EggService:KnitStart()
+	CoinService = Knit.GetService("CoinService")
     DataService = Knit.GetService("DataService")
     
 	print(`[Egg Service] Service started.`)

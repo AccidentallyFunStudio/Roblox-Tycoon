@@ -13,17 +13,29 @@ local Eggs = require(ReplicatedStorage.Shared.Data.Shop.Eggs)
 
 -- Components
 local ItemCard = require(StarterPlayerScripts.Client.Roact.Components.ItemCard)
+local EggCard = require(StarterPlayerScripts.Client.Roact.Components.Cards.EggCard)
 
 function EggsPanel(props, hooks)
-	local eggsCards = {}
+	local eggList = {}
 
-	for _, item in ipairs(Eggs) do
-		eggsCards[item.Id] = Roact.createElement(ItemCard, {
-			Name = item.Name,
-			Description = item.Description,
-			Price = item.Price,
-            Image = item.Image,
-            LayoutOrder = item.LayoutOrder,
+	for _, egg in pairs(Eggs) do
+		table.insert(eggList, egg)
+	end
+
+	table.sort(eggList, function(a, b)
+		return a.LayoutOrder < b.LayoutOrder
+	end)
+
+	local eggCards = {}
+
+	for _, egg in ipairs(eggList) do
+		eggCards[egg.Id] = Roact.createElement(EggCard, {
+			Id = egg.Id,
+			Name = egg.Name,
+			Description = egg.Description,
+			Price = egg.Price,
+			Image = egg.Image,
+			LayoutOrder = egg.LayoutOrder,
 		})
 	end
 
@@ -43,10 +55,10 @@ function EggsPanel(props, hooks)
 			CellSize = UDim2.fromOffset(180, 220),
 			CellPadding = UDim2.fromOffset(16, 16),
 			HorizontalAlignment = Enum.HorizontalAlignment.Center,
-            SortOrder = Enum.SortOrder.LayoutOrder,
+			SortOrder = Enum.SortOrder.LayoutOrder,
 		}),
 
-		Items = Roact.createFragment(eggsCards),
+		Items = Roact.createFragment(eggCards),
 	})
 end
 

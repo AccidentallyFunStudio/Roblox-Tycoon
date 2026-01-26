@@ -14,8 +14,6 @@ local ProfileStore = ProfileService.GetProfileStore("DataTest_1_01", ProfileTemp
 -- DataService
 local DataService = Knit.CreateService({
 	Name = "DataService",
-	DataChanged = Knit.CreateSignal(),
-
 	Client = {
 		DataChanged = Knit.CreateSignal(),
 	},

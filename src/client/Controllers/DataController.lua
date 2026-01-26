@@ -22,18 +22,17 @@ function DataController:KnitStart()
 	DataService = Knit.GetService("DataService")
 
 	-- Initial pull
-	local sucess, data = DataService:GetData():await()
-	if sucess and data and data.Gold then
+	local success, data = DataService:GetData():await()
+	if success and data and data.Gold then
 		Store:dispatch(CoinActions.setCoins(data.Gold))
 	end
 
-	-- -- Reactive updates
-	-- DataService.DataChanged:Connect(function(newData)
-	-- 	Store:dispatch({
-	-- 		type = "SetGold",
-	-- 		value = newData.Gold,
-	-- 	})
-	-- end)
+	-- Reactive updates
+	DataService.DataChanged:Connect(function(payload)
+		if payload.Gold ~= nil then
+			Store:dispatch(CoinActions.setCoins(payload.Gold))
+		end
+	end)
 end
 
 return DataController

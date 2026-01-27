@@ -4,12 +4,15 @@ local Knit = require(game:GetService("ReplicatedStorage").Packages.Knit)
 
 -- Services
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- ProfileService
 local ServerModules = script.Parent.Parent.Modules
 local ProfileService = require(ServerModules.ProfileService)
 local ProfileTemplate = require(script.Parent.Parent.Constants.DataTemplate)
-local ProfileStore = ProfileService.GetProfileStore("DataTest_1_06", ProfileTemplate)
+local ProfileStore = ProfileService.GetProfileStore("DataTest_1_09", ProfileTemplate)
+
+local BiomesConfig = require(ReplicatedStorage.Shared.Data.Shop.Biomes)
 
 -- DataService
 local DataService = Knit.CreateService({
@@ -97,6 +100,26 @@ function DataService:GetData(player: Player): {} | nil
 	else
 		return nil
 	end
+end
+
+function DataService:LoadPlayerWorld(player: Player, data)
+    local enclosure = self:GetPlayerEnclosure(player) -- Your logic to find their plot
+    if not enclosure then return end
+
+    for _, placement in ipairs(data.Placements) do
+        local model = ReplicatedStorage.Assets.Biomes:FindFirstChild(placement.Name)
+        if model then
+            local clone = model:Clone()
+            clone:PivotTo(placement.Transform)
+            clone.Parent = enclosure
+            
+            -- Re-apply runtime attributes
+            local baseId = placement.Name:match("(.+)_%d+$") or placement.Name
+            local config = BiomesConfig[baseId]
+            local level = tonumber(placement.Name:match("_(%d+)$")) or 1
+            clone:SetAttribute("MaxCapacity", config.Capacities[level])
+        end
+    end
 end
 
 --[=[

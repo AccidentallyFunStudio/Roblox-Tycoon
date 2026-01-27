@@ -21,5 +21,6 @@ return {
 			Level = 0
 		}
 	},
-	Animals = {}
+	Animals = {},
+	Placements = {}
 }

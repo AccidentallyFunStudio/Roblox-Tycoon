@@ -89,6 +89,18 @@ function PlacementService:PlaceItem(
 	end
 
 	newItem.Parent = enclosure
+
+	local DataService = Knit.GetService("DataService")
+    local data = DataService:GetData(player) --
+    if data then
+        if not data.Placements then data.Placements = {} end --
+        
+        table.insert(data.Placements, {
+            Name = itemName,
+            Transform = {targetCFrame:GetComponents()} -- This is safe for DataStores
+        })
+    end
+
 	return true
 end
 

@@ -1,4 +1,5 @@
 -- Services
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Knit = require(game.ReplicatedStorage.Packages.Knit)
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
@@ -41,15 +42,26 @@ function EnclosureService:AssignEnclosure(player : Player)
     if not enclosure then return end
 
     enclosure:SetAttribute("OwnerUserId", player.UserId)
-    print(`[Enclosure Service] Assigned Enclosure {enclosure.Name} to Player {player.Name}`)
-
-    -- Initialize Biomes
-    for _, biome in ipairs(enclosure:GetChildren()) do
-        if biome.Name:match("^Biome_") then
-            biome:SetAttribute("Unlocked", biome:GetAttribute("BiomeIndex") == 1)
-            biome:SetAttribute("StoredCoins", 0)
+    
+    -- Load Placed Biomes from DataService
+    local playerData = DataService:GetData(player)
+    if playerData and playerData.Placements then
+        for _, placement in ipairs(playerData.Placements) do
+            local modelTemplate = ReplicatedStorage.Assets.Biomes:FindFirstChild(placement.Name)
+            if modelTemplate then
+                local clone = modelTemplate:Clone()
+                -- Decode the saved CFrame table back into a CFrame object
+                clone:PivotTo(CFrame.new(unpack(placement.Transform)))
+                clone.Parent = enclosure
+                
+                -- Initialize production attributes (if applicable)
+                clone:SetAttribute("Unlocked", true)
+                clone:SetAttribute("StoredCoins", 0)
+            end
         end
     end
+
+    print(`[Enclosure Service] Assigned and Loaded {enclosure.Name} for {player.Name}`)
 end
 
 -- Releases a player's enclosure when they leave the server.
@@ -57,7 +69,16 @@ end
 function EnclosureService:ReleaseEnclosure(player)
     for _, enclosure in ipairs(Enclosures) do
         if enclosure:GetAttribute("OwnerUserId") == player.UserId then
+            -- Clean up all placed biomes
+            for _, child in ipairs(enclosure:GetChildren()) do
+                -- Ensure we don't destroy the floor or the enclosure itself
+                if child:IsA("Model") and child.Name:match("^Biome_") then
+                    child:Destroy()
+                end
+            end
+            
             enclosure:SetAttribute("OwnerUserId", 0)
+            print(`[Enclosure Service] Cleared and Released {enclosure.Name}`)
         end
     end
 end
@@ -119,6 +140,53 @@ function EnclosureService:Collect(player : Player, enclosure)
     if total > 0 then
         CoinService:AddCoins(player, total)
         print(`[Enclosure Service] Collected {total} coins for Player {player.Name}`)
+    end
+end
+
+function EnclosureService:GetPlayerEnclosure(player: Player)
+    for _, enclosure in ipairs(Enclosures) do
+        if enclosure:GetAttribute("OwnerUserId") == player.UserId then
+            return enclosure
+        end
+    end
+    return nil
+end
+
+function EnclosureService:RefreshPlacedBiome(player: Player, biomeId: string, newLevel: number)
+    local enclosure = self:GetPlayerEnclosure(player)
+    if not enclosure then return end
+
+    local oldCFrame = nil
+    
+    -- 1. Find and Destroy ALL existing versions of this specific biome type
+    for _, child in ipairs(enclosure:GetChildren()) do
+        -- Use the Attribute "BiomeId" instead of the Name to avoid suffix confusion
+        if child:IsA("Model") and child:GetAttribute("BiomeId") == biomeId then
+            if not oldCFrame then
+                oldCFrame = child:GetPivot() -- Capture the position of the first one we find
+            end
+            child:Destroy() -- Destroy it
+        end
+    end
+
+    -- 2. Spawn the new upgraded level at the captured position
+    if oldCFrame then
+        local newModelName = string.format("%s_%02d", biomeId, newLevel)
+        local newTemplate = ReplicatedStorage.Assets.Biomes:FindFirstChild(newModelName)
+        
+        if newTemplate then
+            local newClone = newTemplate:Clone()
+            newClone:PivotTo(oldCFrame)
+            newClone.Parent = enclosure
+            
+            -- Ensure attributes are correctly set for the new level
+            newClone:SetAttribute("Unlocked", true)
+            newClone:SetAttribute("StoredCoins", 0)
+            -- Re-apply BiomeId so the NEXT upgrade can find this model
+            newClone:SetAttribute("BiomeId", biomeId) 
+            
+            print(`[Enclosure Service] Replaced {biomeId} with Level {newLevel}`)
+        end
     end
 end
 

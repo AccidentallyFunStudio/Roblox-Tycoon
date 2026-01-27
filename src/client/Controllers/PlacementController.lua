@@ -87,70 +87,112 @@ function PlacementController:UpdateGhost(ghost: Instance, hitPosition: Vector3, 
 	end
 end
 
-function PlacementController:GetMouseWorldPosition() : RaycastResult?
+function PlacementController:GetMouseWorldPosition(): RaycastResult?
 	local mousePos = UserInputService:GetMouseLocation()
-    local unitRay = workspace.CurrentCamera:ViewportPointToRay(mousePos.X, mousePos.Y)
-    
-    local params = RaycastParams.new()
-    params.FilterType = Enum.RaycastFilterType.Include -- ONLY hit these items
-    
-    -- Get everything tagged as a floor
-    local CollectionService = game:GetService("CollectionService")
-    params.FilterDescendantsInstances = CollectionService:GetTagged("PlacableFloor")
+	local unitRay = workspace.CurrentCamera:ViewportPointToRay(mousePos.X, mousePos.Y)
 
-    return workspace:Raycast(unitRay.Origin, unitRay.Direction * MAX_PLACEMENT_DISTANCE, params)
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include -- ONLY hit these items
+
+	-- Get everything tagged as a floor
+	local CollectionService = game:GetService("CollectionService")
+	params.FilterDescendantsInstances = CollectionService:GetTagged("PlacableFloor")
+
+	return workspace:Raycast(unitRay.Origin, unitRay.Direction * MAX_PLACEMENT_DISTANCE, params)
+end
+
+function PlacementController:CheckForOverlap(ghost: Instance): boolean
+	local overlapParams = OverlapParams.new()
+	overlapParams.FilterType = Enum.RaycastFilterType.Exclude
+	-- Ignore the ghost itself and the player
+	overlapParams.FilterDescendantsInstances = { ghost, game.Players.LocalPlayer.Character }
+
+	local cframe, size
+	if ghost:IsA("Model") then
+		cframe, size = ghost:GetBoundingBox()
+	else
+		cframe, size = ghost.CFrame, ghost.Size
+	end
+
+	-- Query the world for any parts inside the ghost's box
+	-- We subtract a tiny bit from the size (0.1) to prevent the floor from triggering an overlap
+	local partsInBox = workspace:GetPartBoundsInBox(cframe, size - Vector3.new(0.1, 0.1, 0.1), overlapParams)
+
+	-- Filter results: we only care if it hits something that ISN'T a "PlacableFloor"
+	for _, part in ipairs(partsInBox) do
+		if not part:HasTag("PlacableFloor") then
+			return true -- Overlap detected
+		end
+	end
+
+	return false
 end
 
 function PlacementController:KnitStart()
 	local PlacementService = Knit.GetService("PlacementService")
-    local debounce = false
+	local debounce = false
 
-    -- Input Listener for Rotation ('R') and Cancellation (RMB)
-    UserInputService.InputBegan:Connect(function(input, processed)
-        if processed then return end
-        
-        -- Rotation Logic
-        if input.KeyCode == Enum.KeyCode.R and self.IsPlacing then
-            self.CurrentRotation = (self.CurrentRotation + 90) % 360
-            print("Rotation updated: " .. self.CurrentRotation)
-        end
+	-- Input Listener for Rotation ('R') and Cancellation (RMB)
+	UserInputService.InputBegan:Connect(function(input, processed)
+		if processed then
+			return
+		end
 
-        -- Cancellation (RMB)
-        if input.UserInputType == Enum.UserInputType.MouseButton2 and self.IsPlacing then
-            self:StopPlacement()
-            print("Placement Cancelled")
-        end
-    end)
+		-- Rotation Logic
+		if input.KeyCode == Enum.KeyCode.R and self.IsPlacing then
+			self.CurrentRotation = (self.CurrentRotation + 90) % 360
+			print("Rotation updated: " .. self.CurrentRotation)
+		end
 
-    RunService.RenderStepped:Connect(function()
-        if not self.IsPlacing or not self.CurrentGhost then return end
+		-- Cancellation (RMB)
+		if input.UserInputType == Enum.UserInputType.MouseButton2 and self.IsPlacing then
+			self:StopPlacement()
+			print("Placement Cancelled")
+		end
+	end)
 
-        local result = self:GetMouseWorldPosition()
+	RunService.RenderStepped:Connect(function()
+		if not self.IsPlacing or not self.CurrentGhost then
+			return
+		end
 
-        -- FIX: Check if result exists BEFORE indexing .Instance
-        if result then
-            local hitInstance = result.Instance
-            local isFloor = hitInstance:HasTag("PlacableFloor") or (hitInstance.Parent and hitInstance.Parent:HasTag("PlacableFloor"))
+		local result = self:GetMouseWorldPosition()
+		if result then
+			local hitInstance = result.Instance
+			local enclosure = hitInstance:FindFirstAncestorOfClass("Model")
+			local isOwner = enclosure and enclosure:GetAttribute("OwnerUserId") == game.Players.LocalPlayer.UserId
 
-            if isFloor then
-                self.CurrentGhost.Parent = workspace
-                self:UpdateGhost(self.CurrentGhost, result.Position, result.Normal)
+			if hitInstance:HasTag("PlacableFloor") and isOwner then
+				self.CurrentGhost.Parent = workspace
+				self:UpdateGhost(self.CurrentGhost, result.Position, result.Normal)
 
-                -- Place Item (LMB)
-                if UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) and not debounce then
-                    debounce = true
-                    -- Note: No 'player' arg passed here; Knit handles it on server
-                    PlacementService:PlaceItem(self.CurrentGhost.Name, self.CurrentGhost:GetPivot(), result.Instance)
-                    task.wait(0.3)
-                    debounce = false
-                end
-                return -- Exit successfully
-            end
-        end
+				-- CHECK OVERLAP
+				local isOverlapping = self:CheckForOverlap(self.CurrentGhost)
 
-        -- Hide ghost if no result or not hitting a floor
-        self.CurrentGhost.Parent = nil
-    end)
+				-- Visual feedback
+				local color = if isOverlapping then Color3.fromRGB(255, 0, 0) else Color3.fromRGB(0, 255, 0)
+				for _, p in ipairs(self.CurrentGhost:GetDescendants()) do
+					if p:IsA("BasePart") then
+						p.Color = color
+					end
+				end
+
+				-- Only allow click if NOT overlapping
+				if
+					UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
+					and not debounce
+					and not isOverlapping
+				then
+					debounce = true
+					PlacementService:PlaceItem(self.CurrentGhost.Name, self.CurrentGhost:GetPivot(), result.Instance)
+					task.wait(0.3)
+					debounce = false
+				end
+				return
+			end
+		end
+		self.CurrentGhost.Parent = nil
+	end)
 end
 
 return PlacementController

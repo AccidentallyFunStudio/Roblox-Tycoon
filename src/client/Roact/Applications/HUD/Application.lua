@@ -10,6 +10,7 @@ local RoactHooks = require(ReplicatedStorage.Packages.Hooks)
 local Frames = StarterPlayer.StarterPlayerScripts.Client.Roact.Applications.HUD.Frames
 local TopFrame = require(Frames.TopFrame)
 local LeftFrame = require(Frames.LeftFrame)
+local BottomFrame = require(Frames.BottomFrame)
 
 -- Component
 local function HUD(_, hooks)
@@ -22,6 +23,7 @@ local function HUD(_, hooks)
 		}, {
 			TopFrame = Roact.createElement(TopFrame),
             LeftFrame = Roact.createElement(LeftFrame),
+			BottomFrame = Roact.createElement(BottomFrame)
 		}),
 	})
     

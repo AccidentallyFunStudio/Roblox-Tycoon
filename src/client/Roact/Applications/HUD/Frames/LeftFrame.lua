@@ -18,6 +18,7 @@ local Textures = require(ReplicatedStorage.Shared.Data.Textures.UI)
 
 -- LeftFrame
 function LeftFrame(_, hooks)
+	local AudioController = Knit.GetController("AudioController")
 	local TeleportController = Knit.GetController("TeleportController")
 
 	return Roact.createElement("Frame", {
@@ -38,6 +39,7 @@ function LeftFrame(_, hooks)
 			BackgroundColor3 = ColorPallete.White,
 			LayoutOrder = 1,
 			[Roact.Event.MouseButton1Click] = function()
+				AudioController:PlaySFX("UI_Click")
 				TeleportController:TeleportToShop()
 				Store:dispatch(UIActions.SetCurrentUI("Shop"))
 				Store:dispatch(UIActions.SetCurrentTab("Eggs"))
@@ -69,45 +71,46 @@ function LeftFrame(_, hooks)
 			}),
 		}),
 
-		SpinWheelButton = Roact.createElement("ImageButton", {
-			Size = UDim2.new(0, 65, 0, 65),
-			BackgroundColor3 = ColorPallete.White,
-			LayoutOrder = 2,
-			[Roact.Event.MouseButton1Click] = function()
-				print("Spin Wheel Button Clicked!")
-			end,
-		}, {
-			UICorner = Roact.createElement("UICorner", {
-				CornerRadius = UDim.new(0, 10),
-			}),
-			UIStroke = Roact.createElement("UIStroke", {
-				Color = ColorPallete.Gold,
-				Thickness = 4,
-			}),
-			SpinWheelIcon = Roact.createElement("ImageLabel", {
-				Size = UDim2.new(0, 45, 0, 45),
-				Position = UDim2.new(0.5, 0, 0.5, -10),
-				AnchorPoint = Vector2.new(0.5, 0.5),
-				Image = Textures["SpinWheel"],
-				BackgroundTransparency = 1,
-			}),
-			SpinWheelLabel = Roact.createElement("TextLabel", {
-				Size = UDim2.new(1, 0, 0, 20),
-				Position = UDim2.new(0.5, 0, 1, -25),
-				AnchorPoint = Vector2.new(0.5, 0),
-				Text = "Spin",
-				TextColor3 = ColorPallete.Gold,
-				Font = Enum.Font.GothamBold,
-				TextSize = 16,
-				BackgroundTransparency = 1,
-			}),
-		}),
+		-- SpinWheelButton = Roact.createElement("ImageButton", {
+		-- 	Size = UDim2.new(0, 65, 0, 65),
+		-- 	BackgroundColor3 = ColorPallete.White,
+		-- 	LayoutOrder = 2,
+		-- 	[Roact.Event.MouseButton1Click] = function()
+		-- 		print("Spin Wheel Button Clicked!")
+		-- 	end,
+		-- }, {
+		-- 	UICorner = Roact.createElement("UICorner", {
+		-- 		CornerRadius = UDim.new(0, 10),
+		-- 	}),
+		-- 	UIStroke = Roact.createElement("UIStroke", {
+		-- 		Color = ColorPallete.Gold,
+		-- 		Thickness = 4,
+		-- 	}),
+		-- 	SpinWheelIcon = Roact.createElement("ImageLabel", {
+		-- 		Size = UDim2.new(0, 45, 0, 45),
+		-- 		Position = UDim2.new(0.5, 0, 0.5, -10),
+		-- 		AnchorPoint = Vector2.new(0.5, 0.5),
+		-- 		Image = Textures["SpinWheel"],
+		-- 		BackgroundTransparency = 1,
+		-- 	}),
+		-- 	SpinWheelLabel = Roact.createElement("TextLabel", {
+		-- 		Size = UDim2.new(1, 0, 0, 20),
+		-- 		Position = UDim2.new(0.5, 0, 1, -25),
+		-- 		AnchorPoint = Vector2.new(0.5, 0),
+		-- 		Text = "Spin",
+		-- 		TextColor3 = ColorPallete.Gold,
+		-- 		Font = Enum.Font.GothamBold,
+		-- 		TextSize = 16,
+		-- 		BackgroundTransparency = 1,
+		-- 	}),
+		-- }),
 
 		InventoryButton = Roact.createElement("ImageButton", {
 			Size = UDim2.new(0, 65, 0, 65),
 			BackgroundColor3 = ColorPallete.White,
 			LayoutOrder = 3,
 			[Roact.Event.MouseButton1Click] = function()
+				AudioController:PlaySFX("UI_Click")
 				Store:dispatch(UIActions.SetCurrentUI("Inventory"))
 				Store:dispatch(UIActions.SetCurrentTab("Animals"))
 				print("Inventory Button Clicked!")
@@ -144,6 +147,7 @@ function LeftFrame(_, hooks)
 			BackgroundColor3 = ColorPallete.White,
 			LayoutOrder = 4,
 			[Roact.Event.MouseButton1Click] = function()
+				AudioController:PlaySFX("UI_Click")
 				TeleportController:TeleportToEnclosure()
 				Store:dispatch(UIActions.ResetCurrentUI())
 			end,

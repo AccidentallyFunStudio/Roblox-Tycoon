@@ -57,15 +57,29 @@ function BiomesPanel(props, hooks)
 	for _, item in ipairs(biomeList) do
 		local biomeData = data.Biomes and data.Biomes[item.Id]
 		local currentLevel = biomeData and biomeData.Level or 0
-		local buttonText = "Purchase"
-		local isClickable = true
+
+		-- Check if this specific biome type is already in the Zoo
+		local isAlreadyPlaced = false
+		if data.Placements then
+			for _, p in ipairs(data.Placements) do
+				if p.Name:match("^" .. item.Id) then
+					isAlreadyPlaced = true
+					break
+				end
+			end
+		end
+
+		local buttonText = "Locked"
+		local isClickable = false
 
 		if currentLevel > 0 then
-			-- For this prototype, we assume "Place" is the default action for owned biomes
-			buttonText = "Place"
-			isClickable = true
-		else
-			isClickable = false -- Cannot place what you don't own
+			if isAlreadyPlaced then
+				buttonText = "Placed" -- Change text to indicate it's finished
+				isClickable = false -- Disable the button
+			else
+				buttonText = "Place"
+				isClickable = true
+			end
 		end
 
 		biomeCards[item.Id] = Roact.createElement(BiomeCard, {
@@ -85,6 +99,7 @@ function BiomesPanel(props, hooks)
 					local modelName = string.format("Biome_%s_%02d", item.Name, currentLevel)
 					PlacementController:StartPlacement(modelName)
 				end
+				Knit.GetController("AudioController"):PlaySFX("UI_Purchase")
 			end,
 		})
 	end

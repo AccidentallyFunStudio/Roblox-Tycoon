@@ -7,8 +7,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Packages = ReplicatedStorage.Packages
 local Knit = require(Packages.Knit)
 
-local MusicPlayer : Sound = SoundService:FindFirstChild("Music")
 local Music = require(ReplicatedStorage.Shared.Data.Sounds.Music)
+local Sounds = require(ReplicatedStorage.Shared.Data.Sounds.UI)
+
+local MusicPlayer : Sound = SoundService:FindFirstChild("Music")
+local SoundPlayer : Sound = SoundService:FindFirstChild("Sound")
 
 -- AudioController
 local AudioController = Knit.CreateController({
@@ -22,13 +25,26 @@ function AudioController:PlayMusic(name : string)
 
     MusicPlayer.SoundId = Music[name]
     MusicPlayer.TimePosition = 0
-    MusicPlayer.Volume = 0.25
+    MusicPlayer.Volume = 0.01
     MusicPlayer.Looped = true
     MusicPlayer:Play()
 end
 
+function AudioController:PlaySFX(name)
+    if not SoundPlayer then return end
+
+    SoundPlayer.Volume = 0.1
+    SoundPlayer.TimePosition = 0
+    SoundPlayer.Looped = false
+    SoundPlayer.SoundId = Sounds[name]
+
+    if not SoundPlayer.Playing then
+        SoundPlayer:Play()
+    end
+end
+
 function AudioController:KnitStart()
-    -- self:PlayMusic("Gameplay")
+    self:PlayMusic("Gameplay")
     print("[Audio Controller] Controller started.")
 end
 

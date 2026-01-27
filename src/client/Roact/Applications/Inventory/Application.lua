@@ -3,6 +3,7 @@ local StarterPlayerScripts = game:GetService("StarterPlayer").StarterPlayerScrip
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Packages
+local Knit = require(ReplicatedStorage.Packages.Knit)
 local Roact = require(ReplicatedStorage.Packages.Roact)
 local RoactHooks = require(ReplicatedStorage.Packages.Hooks)
 local RoduxHooks = require(ReplicatedStorage.Packages.Roduxhooks)
@@ -87,6 +88,7 @@ local function Inventory(_, hooks)
 				Active = UIReducer.CurrentTab == "Animals",
 				OnClick = function(value)
 					Store:dispatch(UIActions.SetCurrentTab(value))
+					Knit.GetController("AudioController"):PlaySFX("UI_Click")
 				end,
 			}),
 
@@ -96,6 +98,7 @@ local function Inventory(_, hooks)
 				Active = UIReducer.CurrentTab == "Eggs",
 				OnClick = function(value)
 					Store:dispatch(UIActions.SetCurrentTab(value))
+					Knit.GetController("AudioController"):PlaySFX("UI_Click")
 				end
 			}),
 
@@ -105,6 +108,7 @@ local function Inventory(_, hooks)
 				Active = UIReducer.CurrentTab == "Biomes",
 				OnClick = function(value)
 					Store:dispatch(UIActions.SetCurrentTab(value))
+					Knit.GetController("AudioController"):PlaySFX("UI_Click")
 				end
 			})
 		}),

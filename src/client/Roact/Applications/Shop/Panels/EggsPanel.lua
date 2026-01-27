@@ -45,6 +45,7 @@ function EggsPanel(props, hooks)
 				Label = `{egg.Price} Gold`,
 				OnClick = function()
 					EggController:BuyEgg(egg.Id)
+					Knit.GetController("AudioController"):PlaySFX("UI_Purchase")
 				end,
 			},
 		})

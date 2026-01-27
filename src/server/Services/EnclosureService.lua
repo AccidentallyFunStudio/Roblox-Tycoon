@@ -6,7 +6,9 @@ local Workspace = game:GetService("Workspace")
 
 local EnclosureService = Knit.CreateService({
 	Name = "EnclosureService",
-	Client = {},
+	Client = {
+		GoldCollected = Knit.CreateSignal()
+	},
 })
 
 -- Folder containing all Enclosure instances in the world.
@@ -99,6 +101,7 @@ function EnclosureService:AssignEnclosure(player: Player)
 				-- Check if the player touching the plate is the actual owner
 				if player and enclosure:GetAttribute("OwnerUserId") == player.UserId then
 					Knit.GetService("GoldService"):CollectGold(player)
+					EnclosureService.Client.GoldCollected:Fire(player)
 				end
 			end)
 		end

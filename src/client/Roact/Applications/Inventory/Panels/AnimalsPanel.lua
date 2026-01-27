@@ -78,6 +78,8 @@ function AnimalsPanel(props, hooks)
 					-- Store:dispatch(UIActions.ShowNotification("You need to hatch an egg first!"))
 					Store:dispatch(UIActions.SetCurrentTab("Eggs"))
 				end
+				
+				Knit.GetController("AudioController"):PlaySFX("UI_Click")
 			end,
 		})
 	end

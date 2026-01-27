@@ -69,17 +69,18 @@ function BiomesPanel(props, hooks)
 
 		local buttonText = "Purchase"
 		local subtext = `Price: {biome.Upgrades[1].Cost} Gold`
-		local canClick = true
+		local canClick = true -- Default state
 
 		if currentLevel > 0 then
 			if isMaxed then
 				buttonText = "Maxed"
 				subtext = "Level: MAX"
-				canClick = false
+				canClick = false -- Disable clicking when maxed
 			else
 				local nextLevel = currentLevel + 1
 				buttonText = "Upgrade"
 				subtext = `Cost: {biome.Upgrades[nextLevel].Cost} Gold`
+				canClick = true
 			end
 		end
 
@@ -90,13 +91,20 @@ function BiomesPanel(props, hooks)
 			ButtonText = buttonText,
 			Subtext = subtext,
 			ShowSubtext = true,
-			ButtonClickable = canClick,
+			ButtonClickable = canClick, -- Passes the disabled state to the component
 			OnButtonClick = function()
+				-- Only execute if the button is not maxed/clickable
+				if not canClick or isMaxed then
+					return
+				end
+
 				if currentLevel == 0 then
 					Knit.GetService("BiomeService"):PurchaseBiome(biome.Id)
 				elseif not isMaxed then
 					Knit.GetService("BiomeService"):UpgradeBiome(biome.Id)
 				end
+
+				Knit.GetController("AudioController"):PlaySFX("UI_Purchase")
 			end,
 		})
 	end

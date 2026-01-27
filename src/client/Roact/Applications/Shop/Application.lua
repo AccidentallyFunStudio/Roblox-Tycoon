@@ -66,6 +66,7 @@ local function Shop(_, hooks)
 				Size = UDim2.fromOffset(30, 30),
 				OnClick = function()
 					Store:dispatch(UIActions.SetCurrentUI(""))
+					Knit.GetController("AudioController"):PlaySFX("UI_Click")
 				end,
 			}),
 		}),
@@ -91,6 +92,7 @@ local function Shop(_, hooks)
 				LayoutOrder = 1,
 				OnClick = function(value)
 					Store:dispatch(UIActions.SetCurrentTab(value))
+					Knit.GetController("AudioController"):PlaySFX("UI_Click")
 				end,
 			}),
 
@@ -101,6 +103,7 @@ local function Shop(_, hooks)
 				LayoutOrder = 2,
 				OnClick = function(value)
 					Store:dispatch(UIActions.SetCurrentTab(value))
+					Knit.GetController("AudioController"):PlaySFX("UI_Click")
 				end,
 			}),
 		}),

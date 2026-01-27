@@ -22,89 +22,50 @@ local PlacementService = Knit.CreateService({
 
 -- || Functions || --
 
+-- PlacementService.lua
+
 function PlacementService:PlaceItem(
 	player: Player,
 	itemName: string,
 	targetCFrame: CFrame,
 	targetFloor: Instance
 ): boolean
-	-- Validation
 	if not targetFloor:IsA("BasePart") or not targetFloor:HasTag("PlacableFloor") then
 		return false
 	end
+
 	local enclosure = targetFloor:FindFirstAncestorOfClass("Model")
 	if not enclosure or enclosure:GetAttribute("OwnerUserId") ~= player.UserId then
 		return false
 	end
 
-	-- Distance Check
-	local char = player.Character
-	if not char or (char:GetPivot().Position - targetCFrame.Position).Magnitude > 110 then
-		return false
-	end
-
-	-- 1. Physical Placement
-	local itemTemplate = Workspace.Assets.Biomes:FindFirstChild(itemName)
-	if not itemTemplate then
-		return false
-	end
-
-	-- Cleanup existing physical biome of same type before placing new one
-	local baseId = itemName:match("(.+)_%d+$") or itemName
-	for _, child in ipairs(enclosure:GetChildren()) do
-		if child:IsA("Model") and (child:GetAttribute("BiomeId") == baseId or child.Name:match("^" .. baseId)) then
-			child:Destroy()
-		end
-	end
-
-	local newItem = itemTemplate:Clone()
-	newItem:PivotTo(targetCFrame)
-	newItem:SetAttribute("BiomeId", baseId) -- Critical for identification
-	newItem:SetAttribute("OwnerUserId", player.UserId)
-	newItem.Parent = enclosure
-
-	-- 2. Data Persistence (The Fix for Duplication)
+	-- Ownership Check
 	local data = DataService:GetData(player)
-	-- 1. Extract the base name (e.g., "Biome_Forest_01" -> "Biome_Forest")
 	local baseId = itemName:match("(.+)_%d+$") or itemName
-
-	-- 2. Check the dictionary correctly
-	if not data.Biomes or not data.Biomes[baseId] then
-		warn(`[PlacementService] {player.Name} does not own biome category: {baseId}`)
-		return false
-	end
-
-	-- 3. (Optional) Check if it is actually unlocked
-	-- if data.Biomes[baseId].Unlocked == false then
-	-- 	warn(`[PlacementService] {player.Name} has not unlocked {baseId} yet!`)
-	-- 	return false
-	-- end
 
 	if data then
 		if not data.Placements then
 			data.Placements = {}
 		end
 
-		local existingIndex = nil
-		for i, p in ipairs(data.Placements) do
+		-- Check if this biome type is ALREADY placed
+		for _, p in ipairs(data.Placements) do
 			local pBaseId = p.Name:match("(.+)_%d+$") or p.Name
 			if pBaseId == baseId then
-				existingIndex = i
-				break
+				warn(`[PlacementService] {player.Name} already has a {baseId} placed. Moving is disabled.`)
+				return false -- BLOCK the placement
 			end
 		end
 
+		-- If we reached here, no existing biome was found, so we can place a new one
 		local placementEntry = {
 			Name = itemName,
 			Transform = { targetCFrame:GetComponents() },
-			Animals = (existingIndex and data.Placements[existingIndex].Animals) or {},
+			Animals = {},
 		}
 
-		if existingIndex then
-			data.Placements[existingIndex] = placementEntry
-		else
-			table.insert(data.Placements, placementEntry)
-		end
+		table.insert(data.Placements, placementEntry)
+		DataService.Client.DataChanged:Fire(player, data) -- Notify client of update
 	end
 
 	return true

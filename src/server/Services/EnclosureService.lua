@@ -56,7 +56,7 @@ function EnclosureService:AssignEnclosure(player: Player)
 			end -- Skip if already spawned
 			spawnedBaseIds[baseId] = true
 
-			local modelTemplate = ReplicatedStorage.Assets.Biomes:FindFirstChild(placement.Name)
+			local modelTemplate = Workspace.Assets.Biomes:FindFirstChild(placement.Name)
 			if modelTemplate then
 				local clone = modelTemplate:Clone()
 				clone:PivotTo(CFrame.new(unpack(placement.Transform)))
@@ -228,7 +228,7 @@ function EnclosureService:RefreshPlacedBiome(player: Player, biomeId: string, ne
 	-- 2. Spawn the new upgraded level
 	if oldCFrame then
 		local newModelName = string.format("%s_%02d", biomeId, newLevel)
-		local newTemplate = ReplicatedStorage.Assets.Biomes:FindFirstChild(newModelName)
+		local newTemplate = Workspace.Assets.Biomes:FindFirstChild(newModelName)
 
 		if newTemplate then
 			local newClone = newTemplate:Clone()

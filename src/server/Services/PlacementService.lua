@@ -1,5 +1,6 @@
 -- Game Services
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
 
 -- Packages
 local Knit = require(ReplicatedStorage.Packages.Knit)
@@ -43,7 +44,7 @@ function PlacementService:PlaceItem(
 	end
 
 	-- 1. Physical Placement
-	local itemTemplate = ReplicatedStorage.Assets.Biomes:FindFirstChild(itemName)
+	local itemTemplate = Workspace.Assets.Biomes:FindFirstChild(itemName)
 	if not itemTemplate then
 		return false
 	end
@@ -64,6 +65,21 @@ function PlacementService:PlaceItem(
 
 	-- 2. Data Persistence (The Fix for Duplication)
 	local data = DataService:GetData(player)
+	-- 1. Extract the base name (e.g., "Biome_Forest_01" -> "Biome_Forest")
+	local baseId = itemName:match("(.+)_%d+$") or itemName
+
+	-- 2. Check the dictionary correctly
+	if not data.Biomes or not data.Biomes[baseId] then
+		warn(`[PlacementService] {player.Name} does not own biome category: {baseId}`)
+		return false
+	end
+
+	-- 3. (Optional) Check if it is actually unlocked
+	-- if data.Biomes[baseId].Unlocked == false then
+	-- 	warn(`[PlacementService] {player.Name} has not unlocked {baseId} yet!`)
+	-- 	return false
+	-- end
+
 	if data then
 		if not data.Placements then
 			data.Placements = {}
@@ -151,12 +167,12 @@ function PlacementService:PlaceAnimalManual(player: Player, biomeModel: Model, a
 			local targetBiomeId = biomeModel:GetAttribute("BiomeId")
 			local ownedCount = data.Animals[animalId] or 0
 			if ownedCount <= 0 then
-            	warn(`[Placement Service] {player.Name} tried to place {animalId} but owns 0.`)
-            return false
-        	end
+				warn(`[Placement Service] {player.Name} tried to place {animalId} but owns 0.`)
+				return false
+			end
 
 			data.Animals[animalId] = ownedCount - 1
-        	print(`[Placement Service] {player.Name} inventory for {animalId} decreased to {data.Animals[animalId]}`)
+			print(`[Placement Service] {player.Name} inventory for {animalId} decreased to {data.Animals[animalId]}`)
 
 			for _, placement in ipairs(data.Placements) do
 				-- We match based on the BiomeId or Name
@@ -165,7 +181,7 @@ function PlacementService:PlaceAnimalManual(player: Player, biomeModel: Model, a
 					table.insert(placement.Animals, animalId)
 
 					DataService.Client.DataChanged:Fire(player, data)
-					
+
 					print(`[Placement Service] Saved {animalId} to Data for {player.Name}`)
 					break
 				end

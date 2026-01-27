@@ -2,7 +2,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local LocalPlayer = game:GetService("Players").LocalPlayer
 local Workspace = game:GetService("Workspace")
 
 -- Packages
@@ -145,7 +144,7 @@ function PlacementController:TestAnimalPlacement(animalId)
 	-- 1. Find the player's enclosure in the workspace
 	local enclosuresFolder = workspace.Gameplay.Scripts:FindFirstChild("Enclosures")
 	if not enclosuresFolder then
-		warn("Enclosures folder path not found!")
+		warn("[Placement Controller] Enclosures folder path not found!")
 		return
 	end
 
@@ -158,7 +157,7 @@ function PlacementController:TestAnimalPlacement(animalId)
 	end
 
 	if not enclosure then
-		warn("Could not find your enclosure!")
+		warn("[Placement Controller] Could not find your enclosure!")
 		return
 	end
 
@@ -174,7 +173,7 @@ function PlacementController:TestAnimalPlacement(animalId)
 	end
 
 	if not targetBiome then
-		warn("You don't have a " .. animalInfo.Biome .. " biome placed yet!")
+		warn("[Placement Controller] You don't have a " .. animalInfo.Biome .. " biome placed yet!")
 		return
 	end
 
@@ -182,9 +181,9 @@ function PlacementController:TestAnimalPlacement(animalId)
 	local success = PlacementService:PlaceAnimalManual(targetBiome, animalId):await()
 
 	if success then
-		print("Successfully placed " .. animalInfo.Name)
+		print("[Placement Controller] Successfully placed " .. animalInfo.Name)
 	else
-		warn("Failed to place animal. Check capacity!")
+		warn("[Placement Controller] Failed to place animal. Check capacity!")
 	end
 end
 
@@ -201,13 +200,13 @@ function PlacementController:KnitStart()
 		-- Rotation
 		if input.KeyCode == Enum.KeyCode.R and self.IsPlacing then
 			self.CurrentRotation = (self.CurrentRotation + 90) % 360
-			print("Rotation updated: " .. self.CurrentRotation)
+			print("[Placement Controller] Rotation updated: " .. self.CurrentRotation)
 		end
 
 		-- Cancellation
 		if input.KeyCode == Enum.KeyCode.E and self.IsPlacing then
 			self:StopPlacement()
-			print("Placement Cancelled")
+			print("[Placement Controller] Placement Cancelled")
 		end
 	end)
 
@@ -241,17 +240,17 @@ function PlacementController:KnitStart()
 				if UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
 					debounce = true
 
-					print(`[Client] Sending to Server: Name={self.CurrentGhost.Name}, Floor={result.Instance.Name}`)
+					print(`[Placement Controller] Sending to Server: Name={self.CurrentGhost.Name}, Floor={result.Instance.Name}`)
 
 					PlacementService:PlaceItem(self.CurrentGhost.Name, self.CurrentGhost:GetPivot(), result.Instance)
 						:andThen(function(success)
-							print(`[Client] Placement success: {success}`)
+							print(`[Placement Controller] Placement success: {success}`)
 							if success then
 								self:StopPlacement()
 							end
 						end)
 						:catch(function(err)
-							warn(`[Client] Service Error: {err}`)
+							warn(`[Placement Controller] Service Error: {err}`)
 						end)
 
 					task.wait(0.3)

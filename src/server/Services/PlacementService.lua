@@ -192,6 +192,36 @@ function PlacementService:AutoPlaceAnimal(player: Player, animalId: string): boo
 	return false
 end
 
+function PlacementService:TestAnimalPlacement(player: Player, animalId: string, targetBiomeModel: Model)
+    -- 1. Retrieve Animal Data by Id (using our new dictionary structure)
+    local animalData = AnimalsData[animalId]
+    if not animalData then
+        warn(`[Test] Animal ID {animalId} not found.`)
+        return false
+    end
+
+    -- 2. Verify Biome Type Match
+    -- Assuming the Biome model has the "BiomeId" attribute set by BiomeService:InitBiomes
+    local targetBiomeId = targetBiomeModel:GetAttribute("BiomeId")
+    if targetBiomeId ~= animalData.Biome then
+        warn(`[Test] {animalData.Name} requires {animalData.Biome} biome, but target is {targetBiomeId}.`)
+        return false
+    end
+
+    -- 3. Check Capacity
+    -- Capacity is applied as an attribute during BiomeService:InitBiomes
+    local currentCount = #(targetBiomeModel:FindFirstChild("Animals"):GetChildren())
+    local maxCapacity = targetBiomeModel:GetAttribute("Capacity") or 0
+
+    if currentCount >= maxCapacity then
+        warn("[Test] Biome is at maximum capacity.")
+        return false
+    end
+
+    print(`[Test] Success! {animalData.Name} can be placed in {targetBiomeId}.`)
+    return true
+end
+
 -- || Client Functions || --
 
 function PlacementService.Client:PlaceItem(
@@ -201,6 +231,14 @@ function PlacementService.Client:PlaceItem(
 	targetFloor: Instance
 )
 	return self.Server:PlaceItem(player, itemName, targetCFrame, targetFloor)
+end
+
+function PlacementService.Client:TestAnimalPlacement(player: Player, animalId: string, targetBiomeModel: Model)
+	return self.Server:TestAnimalPlacement(player, animalId, targetBiomeModel)
+end
+
+function PlacementService.Client:PlaceAnimalManual(player: Player, biomeModel: Model, animalId: string)
+	return self.Server:PlaceAnimalManual(player, biomeModel, animalId)
 end
 
 -- || Knit Lifecycle || --

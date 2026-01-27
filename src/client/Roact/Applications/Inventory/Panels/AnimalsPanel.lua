@@ -58,10 +58,10 @@ function AnimalsPanel(props, hooks)
 	end
 
 	local animalCards = {}
-	for _, animal in ipairs(Animals) do
-		local amountOwned = (data.Animals and data.Animals[animal.Id]) or 0
+	for animalId, animal in pairs(Animals) do
+		local amountOwned = (data.Animals and data.Animals[animalId]) or 0
 		animalCards[animal.Id] = Roact.createElement(AnimalCard, {
-			Id = animal.Id,
+			Id = animalId,
 			Name = animal.Name,
 			Price = animal.Price,
 			Biome = animal.Biome,
@@ -70,6 +70,9 @@ function AnimalsPanel(props, hooks)
 			ButtonText = amountOwned > 0 and "Add to Biome" or "Hatch Egg",
 			OnButtonClick = function(value)
 				if data.Animals[animal.Id] ~= nil then
+					local PlacementController = Knit.GetController("PlacementController")
+					PlacementController:TestAnimalPlacement(animal.Id)
+
 					-- Store:dispatch(UIActions.ShowNotification(`Adding {animal.Name} to Biome!`))
 				else
 					-- Store:dispatch(UIActions.ShowNotification("You need to hatch an egg first!"))

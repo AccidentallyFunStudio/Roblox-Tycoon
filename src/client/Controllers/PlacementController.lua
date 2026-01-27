@@ -7,6 +7,9 @@ local LocalPlayer = game:GetService("Players").LocalPlayer
 -- Packages
 local Knit = require(ReplicatedStorage.Packages.Knit)
 
+-- Knit Services
+local PlacementService
+
 -- Constants
 local MAX_PLACEMENT_DISTANCE = 1000
 
@@ -129,8 +132,63 @@ function PlacementController:CheckForOverlap(ghost: Instance): boolean
 	return false
 end
 
+function PlacementController:TestAnimalPlacement(animalId)
+	local player = game.Players.LocalPlayer
+	local AnimalsData = require(ReplicatedStorage.Shared.Data.Shop.Animals)
+	local animalInfo = AnimalsData[animalId]
+
+	if not animalInfo then
+		return
+	end
+
+	-- 1. Find the player's enclosure in the workspace
+	local enclosuresFolder = workspace.Gameplay.Scripts:FindFirstChild("Enclosures")
+	if not enclosuresFolder then
+		warn("Enclosures folder path not found!")
+		return
+	end
+
+	local enclosure = nil
+	for _, folder in ipairs(enclosuresFolder:GetChildren()) do
+		if folder:IsA("Model") and folder:GetAttribute("OwnerUserId") == player.UserId then
+			enclosure = folder
+			break
+		end
+	end
+
+	if not enclosure then
+		warn("Could not find your enclosure!")
+		return
+	end
+
+	-- 2. Find the specific Biome model that matches the animal's requirement
+	local targetBiome = nil
+	for _, child in ipairs(enclosure:GetChildren()) do
+		-- check attribute OR check if the name contains the requirement (e.g., "Biome_Forest")
+		local attrId = child:GetAttribute("BiomeId")
+		if child:IsA("Model") and (attrId == animalInfo.Biome or child.Name:match("^Biome_" .. animalInfo.Biome)) then
+			targetBiome = child
+			break
+		end
+	end
+
+	if not targetBiome then
+		warn("You don't have a " .. animalInfo.Biome .. " biome placed yet!")
+		return
+	end
+
+	-- 3. Call the server service to perform the placement
+	local success = PlacementService:PlaceAnimalManual(targetBiome, animalId):await()
+
+	if success then
+		print("Successfully placed " .. animalInfo.Name)
+	else
+		warn("Failed to place animal. Check capacity!")
+	end
+end
+
 function PlacementController:KnitStart()
-	local PlacementService = Knit.GetService("PlacementService")
+	PlacementService = Knit.GetService("PlacementService")
 	local debounce = false
 
 	-- Input Listener for Rotation and Cancellation

@@ -3,6 +3,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = game:GetService("Players").LocalPlayer
+local Workspace = game:GetService("Workspace")
 
 -- Packages
 local Knit = require(ReplicatedStorage.Packages.Knit)
@@ -23,9 +24,9 @@ local PlacementController = Knit.CreateController({
 function PlacementController:StartPlacement(itemName: string)
 	self:StopPlacement()
 
-	local itemAsset = ReplicatedStorage.Assets.Biomes:FindFirstChild(itemName)
+	local itemAsset = Workspace.Assets.Biomes:FindFirstChild(itemName)
 	if not itemAsset then
-		warn(`[Placement Controller] Item named {itemName} not found in Replicated Storage/Assets/Biomes/`)
+		warn(`[Placement Controller] Item named {itemName} not found in Workspace/Assets/Biomes/`)
 		return
 	end
 

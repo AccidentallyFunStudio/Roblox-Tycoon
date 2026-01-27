@@ -74,7 +74,11 @@ function EnclosureService:AssignEnclosure(player: Player)
 						local spot = positions and positions:FindFirstChild(tostring(i))
 						if animalTemplate and spot then
 							local aClone = animalTemplate:Clone()
-							aClone:PivotTo(spot.CFrame)
+
+							local targetPosition = spot.Position
+							local originalRotation = animalTemplate:GetPivot().Rotation
+							local finalCFrame = CFrame.new(targetPosition) * originalRotation
+							aClone:PivotTo(finalCFrame)
 							aClone.Parent = animalsFolder
 
 							local currentCount = clone:GetAttribute("AnimalCount") or 0
@@ -84,6 +88,19 @@ function EnclosureService:AssignEnclosure(player: Player)
 					clone:SetAttribute("AnimalCount", #placement.Animals)
 				end
 			end
+		end
+
+		local plate = enclosure:FindFirstChild("Collection Plate")
+		if plate then
+			plate.Touched:Connect(function(hit)
+				local char = hit.Parent
+				local player = Players:GetPlayerFromCharacter(char)
+
+				-- Check if the player touching the plate is the actual owner
+				if player and enclosure:GetAttribute("OwnerUserId") == player.UserId then
+					Knit.GetService("GoldService"):CollectGold(player)
+				end
+			end)
 		end
 	end
 

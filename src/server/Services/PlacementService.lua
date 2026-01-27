@@ -144,7 +144,35 @@ function PlacementService:PlaceAnimalManual(player: Player, biomeModel: Model, a
 		-- Update attribute for the UI/Service to read later
 		biomeModel:SetAttribute("AnimalCount", #animalsFolder:GetChildren())
 
-		print(`[Server] {animalId} placed at position {currentCount + 1}`)
+		local data = DataService:GetData(player)
+		if data and data.Placements and data.Animals then
+			-- We need to find the specific biome entry in the data table
+			-- Ensure BiomeId attribute was set on the model during placement or init
+			local targetBiomeId = biomeModel:GetAttribute("BiomeId")
+			local ownedCount = data.Animals[animalId] or 0
+			if ownedCount <= 0 then
+            	warn(`[Placement Service] {player.Name} tried to place {animalId} but owns 0.`)
+            return false
+        	end
+
+			data.Animals[animalId] = ownedCount - 1
+        	print(`[Placement Service] {player.Name} inventory for {animalId} decreased to {data.Animals[animalId]}`)
+
+			for _, placement in ipairs(data.Placements) do
+				-- We match based on the BiomeId or Name
+				if placement.Name == biomeModel.Name or placement.BiomeId == targetBiomeId then
+					placement.Animals = placement.Animals or {}
+					table.insert(placement.Animals, animalId)
+
+					DataService.Client.DataChanged:Fire(player, data)
+					
+					print(`[Placement Service] Saved {animalId} to Data for {player.Name}`)
+					break
+				end
+			end
+		end
+
+		print(`[Placement Service] {animalId} placed at position {currentCount + 1}`)
 		return true
 	end
 

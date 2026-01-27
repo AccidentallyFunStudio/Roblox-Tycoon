@@ -21,24 +21,37 @@ local PlacementService = Knit.CreateService({
 
 -- || Functions || --
 
-function PlacementService:PlaceItem(player: Player, itemName: string, targetCFrame: CFrame, targetFloor: Instance): boolean
+function PlacementService:PlaceItem(
+	player: Player,
+	itemName: string,
+	targetCFrame: CFrame,
+	targetFloor: Instance
+): boolean
 	-- Validation
-	if not targetFloor:IsA("BasePart") or not targetFloor:HasTag("PlacableFloor") then return false end
+	if not targetFloor:IsA("BasePart") or not targetFloor:HasTag("PlacableFloor") then
+		return false
+	end
 	local enclosure = targetFloor:FindFirstAncestorOfClass("Model")
-	if not enclosure or enclosure:GetAttribute("OwnerUserId") ~= player.UserId then return false end
+	if not enclosure or enclosure:GetAttribute("OwnerUserId") ~= player.UserId then
+		return false
+	end
 
 	-- Distance Check
 	local char = player.Character
-	if not char or (char:GetPivot().Position - targetCFrame.Position).Magnitude > 110 then return false end
+	if not char or (char:GetPivot().Position - targetCFrame.Position).Magnitude > 110 then
+		return false
+	end
 
 	-- 1. Physical Placement
 	local itemTemplate = ReplicatedStorage.Assets.Biomes:FindFirstChild(itemName)
-	if not itemTemplate then return false end
+	if not itemTemplate then
+		return false
+	end
 
 	-- Cleanup existing physical biome of same type before placing new one
 	local baseId = itemName:match("(.+)_%d+$") or itemName
 	for _, child in ipairs(enclosure:GetChildren()) do
-		if child:IsA("Model") and (child:GetAttribute("BiomeId") == baseId or child.Name:match("^"..baseId)) then
+		if child:IsA("Model") and (child:GetAttribute("BiomeId") == baseId or child.Name:match("^" .. baseId)) then
 			child:Destroy()
 		end
 	end
@@ -52,8 +65,10 @@ function PlacementService:PlaceItem(player: Player, itemName: string, targetCFra
 	-- 2. Data Persistence (The Fix for Duplication)
 	local data = DataService:GetData(player)
 	if data then
-		if not data.Placements then data.Placements = {} end
-		
+		if not data.Placements then
+			data.Placements = {}
+		end
+
 		local existingIndex = nil
 		for i, p in ipairs(data.Placements) do
 			local pBaseId = p.Name:match("(.+)_%d+$") or p.Name
@@ -65,8 +80,8 @@ function PlacementService:PlaceItem(player: Player, itemName: string, targetCFra
 
 		local placementEntry = {
 			Name = itemName,
-			Transform = {targetCFrame:GetComponents()},
-			Animals = (existingIndex and data.Placements[existingIndex].Animals) or {}
+			Transform = { targetCFrame:GetComponents() },
+			Animals = (existingIndex and data.Placements[existingIndex].Animals) or {},
 		}
 
 		if existingIndex then
@@ -80,57 +95,60 @@ function PlacementService:PlaceItem(player: Player, itemName: string, targetCFra
 end
 
 function PlacementService:PlaceAnimalManual(player: Player, biomeModel: Model, animalId: string): boolean
-    -- 1. Validate Biome Ownership
-    local enclosure = biomeModel:FindFirstAncestorOfClass("Model")
-    if not enclosure or enclosure:GetAttribute("OwnerUserId") ~= player.UserId then
-        warn("[PlacementService] Player does not own this enclosure.")
-        return false
-    end
+	local animalData = AnimalsData[animalId]
+	if not animalData then
+		return false
+	end
 
-    -- 2. Capacity Check using Procedural Attributes
-    local currentCount = biomeModel:GetAttribute("AnimalCount") or 0
-    local maxCapacity = biomeModel:GetAttribute("Capacity") or 0 -- Set in BiomeService:InitBiomes
+	-- 1. Setup Folders
+	local animalsFolder = biomeModel:FindFirstChild("Animals") or Instance.new("Folder", biomeModel)
+	animalsFolder.Name = "Animals"
 
-    if currentCount >= maxCapacity then
-        warn("[PlacementService] Biome is at max capacity!")
-        return false
-    end
+	local positionsFolder = biomeModel:FindFirstChild("Positions")
+	if not positionsFolder then
+		warn("No Positions folder found in " .. biomeModel.Name)
+		return false
+	end
 
-    -- 3. Locate Folders
-    local positionsFolder = biomeModel:FindFirstChild("Positions")
-    local animalsFolder = biomeModel:FindFirstChild("Animals") or Instance.new("Folder", biomeModel)
-    animalsFolder.Name = "Animals"
+	-- 2. Determine Position based on current count
+	local currentCount = #animalsFolder:GetChildren()
+	local maxCapacity = biomeModel:GetAttribute("Capacity") or 5
 
-    -- 4. Spawn Animal from Workspace/Assets/Animals/
-    local animalTemplate = game.Workspace.Assets.Animals:FindFirstChild(animalId)
-    local spawnPart = positionsFolder and positionsFolder:FindFirstChild(tostring(currentCount + 1))
+	if currentCount >= maxCapacity then
+		warn("Biome is full!")
+		return false
+	end
 
-    if animalTemplate and spawnPart then
-        local newAnimal = animalTemplate:Clone()
-        newAnimal:PivotTo(spawnPart.CFrame)
-        newAnimal.Parent = animalsFolder
-        
-        -- Update Attribute for tracking
-        biomeModel:SetAttribute("AnimalCount", currentCount + 1)
-        
-        -- 5. Save to Data for Persistence
-        local DataService = Knit.GetService("DataService")
-        local data = DataService:GetData(player)
-        if data and data.Placements then
-            for _, placement in ipairs(data.Placements) do
-                -- Find the specific placement entry by matching the biome instance name
-                if placement.InstanceName == biomeModel.Name then
-                    placement.Animals = placement.Animals or {}
-                    table.insert(placement.Animals, animalId)
-                    break
-                end
-            end
-        end
-        
-        return true
-    end
+	-- Find the part named after the next index (e.g., "1", "2")
+	local spawnPart = positionsFolder:FindFirstChild(tostring(currentCount + 1))
+	if not spawnPart then
+		-- Fallback: just pick any child if naming is off
+		spawnPart = positionsFolder:GetChildren()[currentCount + 1]
+	end
 
-    return false
+	-- 3. Clone and Parent
+	local asset = workspace.Assets.Animals:FindFirstChild(animalId)
+	if asset and spawnPart then
+		local clone = asset:Clone()
+
+		-- 1. Extract components safely
+		local targetPosition = spawnPart.Position -- Get world position from part
+		local originalRotation = asset:GetPivot().Rotation -- Get rotation-only CFrame from asset
+
+		-- 2. Combine them: Translation * Rotation
+		local finalCFrame = CFrame.new(targetPosition) * originalRotation
+
+		clone:PivotTo(finalCFrame)
+		clone.Parent = animalsFolder
+
+		-- Update attribute for the UI/Service to read later
+		biomeModel:SetAttribute("AnimalCount", #animalsFolder:GetChildren())
+
+		print(`[Server] {animalId} placed at position {currentCount + 1}`)
+		return true
+	end
+
+	return false
 end
 
 function PlacementService:AutoPlaceAnimal(player: Player, animalId: string): boolean
@@ -176,7 +194,7 @@ function PlacementService:AutoPlaceAnimal(player: Player, animalId: string): boo
 			if currentCount < maxCapacity then
 				-- 4. Place Animal at the next available position
 				local spawnPart = positions:GetChildren()[currentCount + 1]
-				local animalTemplate = game.ServerStorage.Items:FindFirstChild(animalId)
+				local animalTemplate = game.Workspace.Assets.Animals:FindFirstChild(animalId)
 
 				if spawnPart and animalTemplate then
 					local newAnimal = animalTemplate:Clone()
@@ -193,33 +211,33 @@ function PlacementService:AutoPlaceAnimal(player: Player, animalId: string): boo
 end
 
 function PlacementService:TestAnimalPlacement(player: Player, animalId: string, targetBiomeModel: Model)
-    -- 1. Retrieve Animal Data by Id (using our new dictionary structure)
-    local animalData = AnimalsData[animalId]
-    if not animalData then
-        warn(`[Test] Animal ID {animalId} not found.`)
-        return false
-    end
+	-- 1. Retrieve Animal Data by Id (using our new dictionary structure)
+	local animalData = AnimalsData[animalId]
+	if not animalData then
+		warn(`[Test] Animal ID {animalId} not found.`)
+		return false
+	end
 
-    -- 2. Verify Biome Type Match
-    -- Assuming the Biome model has the "BiomeId" attribute set by BiomeService:InitBiomes
-    local targetBiomeId = targetBiomeModel:GetAttribute("BiomeId")
-    if targetBiomeId ~= animalData.Biome then
-        warn(`[Test] {animalData.Name} requires {animalData.Biome} biome, but target is {targetBiomeId}.`)
-        return false
-    end
+	-- 2. Verify Biome Type Match
+	-- Assuming the Biome model has the "BiomeId" attribute set by BiomeService:InitBiomes
+	local targetBiomeId = targetBiomeModel:GetAttribute("BiomeId")
+	if targetBiomeId ~= animalData.Biome then
+		warn(`[Test] {animalData.Name} requires {animalData.Biome} biome, but target is {targetBiomeId}.`)
+		return false
+	end
 
-    -- 3. Check Capacity
-    -- Capacity is applied as an attribute during BiomeService:InitBiomes
-    local currentCount = #(targetBiomeModel:FindFirstChild("Animals"):GetChildren())
-    local maxCapacity = targetBiomeModel:GetAttribute("Capacity") or 0
+	-- 3. Check Capacity
+	-- Capacity is applied as an attribute during BiomeService:InitBiomes
+	local currentCount = #(targetBiomeModel:FindFirstChild("Animals"):GetChildren())
+	local maxCapacity = targetBiomeModel:GetAttribute("Capacity") or 0
 
-    if currentCount >= maxCapacity then
-        warn("[Test] Biome is at maximum capacity.")
-        return false
-    end
+	if currentCount >= maxCapacity then
+		warn("[Test] Biome is at maximum capacity.")
+		return false
+	end
 
-    print(`[Test] Success! {animalData.Name} can be placed in {targetBiomeId}.`)
-    return true
+	print(`[Test] Success! {animalData.Name} can be placed in {targetBiomeId}.`)
+	return true
 end
 
 -- || Client Functions || --

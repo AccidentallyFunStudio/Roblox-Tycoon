@@ -76,6 +76,9 @@ function EnclosureService:AssignEnclosure(player: Player)
 							local aClone = animalTemplate:Clone()
 							aClone:PivotTo(spot.CFrame)
 							aClone.Parent = animalsFolder
+
+							local currentCount = clone:GetAttribute("AnimalCount") or 0
+							clone:SetAttribute("AnimalCount", currentCount + 1)
 						end
 					end
 					clone:SetAttribute("AnimalCount", #placement.Animals)

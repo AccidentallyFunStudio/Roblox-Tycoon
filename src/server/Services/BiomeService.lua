@@ -1,12 +1,9 @@
 -- Game Services
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local ServerStorage = game:GetService("ServerStorage")
+local Workspace = game:GetService("Workspace")
 
--- Biomes Folder in Replicated Storage
-local REPLICATED_BIOMES = ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Biomes")
-
--- Biomes Folder in Server Storage
-local SERVER_BIOMES = ServerStorage:WaitForChild("Assets"):WaitForChild("Biomes")
+-- Directories
+local BIOMES_ASSETS = Workspace:WaitForChild("Assets"):WaitForChild("Biomes")
 
 -- Packages
 local Knit = require(ReplicatedStorage.Packages.Knit)
@@ -119,13 +116,8 @@ function BiomeService:InitBiomes()
 			local modelName = biomeId .. suffix
 
 			-- Find models in both locations
-			local models = {
-				REPLICATED_BIOMES:FindFirstChild(modelName),
-				SERVER_BIOMES:FindFirstChild(modelName),
-			}
-
-			for _, model in ipairs(models) do
-				if model and model:IsA("Model") then
+			local model = BIOMES_ASSETS:FindFirstChild(modelName)
+			if model and model:IsA("Model") then
 					-- Set Procedural Attributes from Biomes.lua
 					model:SetAttribute("BiomeId", config.Id)
 					model:SetAttribute("Level", level)
@@ -142,7 +134,6 @@ function BiomeService:InitBiomes()
 				else
 					warn(`[BiomeService] Model {modelName} not found in Assets.`)
 				end
-			end
 		end
 	end
 end

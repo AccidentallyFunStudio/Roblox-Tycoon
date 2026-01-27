@@ -68,12 +68,13 @@ end
 
 function TeleportService:TeleportToEnclosure(player: Player)
     local enclosure = GetPlayerEnclosure(player)
-	if not enclosure or not enclosure.PrimaryPart then
+    local startLocation = enclosure:FindFirstChild("StartLocation")
+	if not enclosure or not startLocation then
 		warn("No enclosure found for", player.Name)
 		return
 	end
 
-	local cf = enclosure.PrimaryPart.CFrame * CFrame.new(0, 3, 0)
+	local cf = startLocation.CFrame * CFrame.new(0, 3, 0)
 	TeleportCharacter(player, cf)
 end
 

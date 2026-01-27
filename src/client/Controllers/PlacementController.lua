@@ -20,8 +20,9 @@ local PlacementController = Knit.CreateController({
 function PlacementController:StartPlacement(itemName: string)
 	self:StopPlacement()
 
-	local itemAsset = ReplicatedStorage.Assets:FindFirstChild(itemName)
+	local itemAsset = ReplicatedStorage.Assets.Biomes:FindFirstChild(itemName)
 	if not itemAsset then
+		warn(`[Placement Controller] Item named {itemName} not found in Replicated Storage/Assets/Biomes/`)
 		return
 	end
 
@@ -132,20 +133,20 @@ function PlacementController:KnitStart()
 	local PlacementService = Knit.GetService("PlacementService")
 	local debounce = false
 
-	-- Input Listener for Rotation ('R') and Cancellation (RMB)
+	-- Input Listener for Rotation and Cancellation
 	UserInputService.InputBegan:Connect(function(input, processed)
 		if processed then
 			return
 		end
 
-		-- Rotation Logic
+		-- Rotation
 		if input.KeyCode == Enum.KeyCode.R and self.IsPlacing then
 			self.CurrentRotation = (self.CurrentRotation + 90) % 360
 			print("Rotation updated: " .. self.CurrentRotation)
 		end
 
-		-- Cancellation (RMB)
-		if input.UserInputType == Enum.UserInputType.MouseButton2 and self.IsPlacing then
+		-- Cancellation
+		if input.KeyCode == Enum.KeyCode.E and self.IsPlacing then
 			self:StopPlacement()
 			print("Placement Cancelled")
 		end
@@ -178,13 +179,22 @@ function PlacementController:KnitStart()
 				end
 
 				-- Only allow click if NOT overlapping
-				if
-					UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
-					and not debounce
-					and not isOverlapping
-				then
+				if UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
 					debounce = true
+
+					print(`[Client] Sending to Server: Name={self.CurrentGhost.Name}, Floor={result.Instance.Name}`)
+
 					PlacementService:PlaceItem(self.CurrentGhost.Name, self.CurrentGhost:GetPivot(), result.Instance)
+						:andThen(function(success)
+							print(`[Client] Placement success: {success}`)
+							if success then
+								self:StopPlacement()
+							end
+						end)
+						:catch(function(err)
+							warn(`[Client] Service Error: {err}`)
+						end)
+
 					task.wait(0.3)
 					debounce = false
 				end

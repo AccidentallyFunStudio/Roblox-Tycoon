@@ -25,6 +25,7 @@ local RoduxHooks = require(ReplicatedStorage.Packages.Roduxhooks)
 local HUD = require(Applications.HUD.Application)
 local Shop = require(Applications.Shop.Application)
 local Inventory = require(Applications.Inventory.Application)
+local Prompt = require(Applications.Prompt.Application)
 
 --local GlobalHoveredFrame = require(Applications.GlobalHoveredFrame.Application)
 
@@ -38,7 +39,7 @@ end
 Root = RoactHooks.new(Roact)(Root)
 
 -- Component
-local function GameFrame(_, hooks)
+local function GameFrame(props)
 	return Roact.createElement(Root, {}, {
 		GameScreenGui = Roact.createElement("ScreenGui", {
 			IgnoreGuiInset = true,
@@ -48,6 +49,7 @@ local function GameFrame(_, hooks)
 			HUD = Roact.createElement(HUD),
 			Shop = Roact.createElement(Shop),
 			Inventory = Roact.createElement(Inventory),
+			Prompt = Roact.createElement(Prompt),
 		}),
 	})
 end

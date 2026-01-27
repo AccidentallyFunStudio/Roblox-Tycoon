@@ -1,6 +1,5 @@
 -- Game Services
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
 local StarterPlayerScripts = game:GetService("StarterPlayer").StarterPlayerScripts
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -9,6 +8,7 @@ local Knit = require(ReplicatedStorage.Packages.Knit)
 local Roact = require(ReplicatedStorage.Packages.Roact)
 local RoactHooks = require(ReplicatedStorage.Packages.Hooks)
 local RoduxHooks = require(ReplicatedStorage.Packages.Roduxhooks)
+local Store = require(StarterPlayerScripts.Client.Rodux.Store)
 
 -- Data
 local ColorPallete = require(ReplicatedStorage.Shared.Data.ColorPallete)
@@ -18,38 +18,30 @@ local Biomes = require(ReplicatedStorage.Shared.Data.Shop.Biomes)
 local BiomeCard = require(StarterPlayerScripts.Client.Roact.Components.Cards.BiomeCard)
 
 function BiomesPanel(props, hooks)
+	local PlacementController = Knit.GetController("PlacementController")
 	local data, setData = hooks.useState(nil)
-	local dispatch = RoduxHooks.useDispatch(hooks)
 
 	hooks.useEffect(function()
-		local DataService = Knit.GetService("DataService")
-
-		-- Initial fetch
-		DataService.GetData():andThen(function(playerData)
-			if playerData then
-				setData(playerData)
+		Knit.OnStart():andThen(function()
+			local DataService = Knit.GetService("DataService")
+			-- Initial fetch
+			DataService.GetData():andThen(function(playerData)
+				if playerData then
+					setData(playerData)
+				end
+			end)
+			-- Listen for live updates so UI refreshes when you buy/upgrade
+			local connection = DataService.DataChanged:Connect(function(newData)
+				setData(newData)
+			end)
+			return function()
+				connection:Disconnect()
 			end
 		end)
-
-		-- Listen for real time updates
-		local connection = DataService.DataChanged:Connect(function(newData)
-			setData(newData) -- This triggers the Roact re-render
-		end)
-
-		return function()
-			connection:Disconnect() -- Cleanup
-		end
 	end, {})
 
-	-- Loading state while waiting for DataService
 	if not data then
-		return Roact.createElement("TextLabel", {
-			Text = "Loading Biomes...",
-			Size = UDim2.fromScale(1, 1),
-			BackgroundTransparency = 1,
-			Font = Enum.Font.FredokaOne,
-			TextSize = 24,
-		})
+		return nil
 	end
 
 	local biomeList = {}
@@ -62,40 +54,36 @@ function BiomesPanel(props, hooks)
 	end)
 
 	local biomeCards = {}
-	for _, biome in ipairs(biomeList) do
-		local biomeState = data.Biomes[biome.Id]
-		local currentLevel = biomeState and biomeState.Level or 0
-		local isMaxed = currentLevel >= biome.MaxLevel
-
+	for _, item in ipairs(biomeList) do
+		local biomeData = data.Biomes and data.Biomes[item.Id]
+		local currentLevel = biomeData and biomeData.Level or 0
 		local buttonText = "Purchase"
-		local subtext = `Price: {biome.Upgrades[1].Cost} Gold`
-		local canClick = true
+		local isClickable = true
 
 		if currentLevel > 0 then
-			if isMaxed then
-				buttonText = "Maxed"
-				subtext = "Level: MAX"
-				canClick = false
-			else
-				local nextLevel = currentLevel + 1
-				buttonText = "Upgrade"
-				subtext = `Cost: {biome.Upgrades[nextLevel].Cost} Gold`
-			end
+			-- For this prototype, we assume "Place" is the default action for owned biomes
+			buttonText = "Place"
+			isClickable = true
+		else
+			isClickable = false -- Cannot place what you don't own
 		end
 
-		biomeCards[biome.Id] = Roact.createElement(BiomeCard, {
-			Name = biome.Name,
-			Image = biome.Image,
-			LayoutOrder = biome.LayoutOrder,
+		biomeCards[item.Id] = Roact.createElement(BiomeCard, {
+			Name = item.Name,
+			LayoutOrder = item.LayoutOrder,
+			Image = item.Image,
 			ButtonText = buttonText,
-			Subtext = subtext,
-			ShowSubtext = true,
-			ButtonClickable = canClick,
+			ButtonClickable = isClickable,
+			Subtext = "",
 			OnButtonClick = function()
-				if currentLevel == 0 then
-					Knit.GetService("BiomeService"):PurchaseBiome(biome.Id)
-				elseif not isMaxed then
-					Knit.GetService("BiomeService"):UpgradeBiome(biome.Id)
+				if currentLevel > 0 then
+					local UIActions = require(StarterPlayerScripts.Client.Rodux.Actions.UIActions)
+					Store:dispatch(UIActions.ResetCurrentUI())
+
+					-- Tiered Placement Logic
+					-- Formats name to: Biome_Forest_01, Biome_Forest_02, etc.
+					local modelName = string.format("Biome_%s_%02d", item.Name, currentLevel)
+					PlacementController:StartPlacement(modelName)
 				end
 			end,
 		})

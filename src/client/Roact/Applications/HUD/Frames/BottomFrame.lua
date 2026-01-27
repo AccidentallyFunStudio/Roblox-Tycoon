@@ -14,7 +14,7 @@ local Textures = require(ReplicatedStorage.Shared.Data.Textures.UI)
 function BottomFrame(props, hooks)
     local onBuildClick = function()
         local PlacementController = Knit.GetController("PlacementController")
-        PlacementController:StartPlacement("Biome_Forest_01")
+        PlacementController:StartPlacement("Biome_Forest")
     end
 
     return Roact.createElement("Frame", {

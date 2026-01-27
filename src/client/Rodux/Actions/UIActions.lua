@@ -17,6 +17,13 @@ local UIActions = {
 	SetCurrentTab = Rodux.makeActionCreator("SetCurrentTab", function(value)
 		return { value = value }
 	end),
+
+	ShowNotification = Rodux.makeActionCreator("ShowNotification", function(text)
+        return { 
+            text = text,
+            ticket = os.clock() -- Used as a unique key to reset the pop-up timer
+        }
+    end),
 }
 
 return UIActions

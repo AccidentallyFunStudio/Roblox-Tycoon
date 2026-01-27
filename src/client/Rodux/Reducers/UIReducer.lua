@@ -7,6 +7,8 @@ local Rodux = require(ReplicatedStorage.Packages.Rodux)
 local UIReducer = Rodux.createReducer({
     CurrentUI = "",
     CurrentTab = "Animals",
+    NotificationText = nil,
+    NotificationTicket = nil,
 }, {
     SetCurrentUI = function(state, action)
         local newState = table.clone(state)
@@ -23,6 +25,13 @@ local UIReducer = Rodux.createReducer({
     SetCurrentTab = function(state, action)
         local newState = table.clone(state)
         newState.CurrentTab = action.value
+        return newState
+    end,
+
+    ShowNotification = function(state, action)
+        local newState = table.clone(state)
+        newState.NotificationText = action.text
+        newState.NotificationTicket = action.ticket
         return newState
     end,
 })

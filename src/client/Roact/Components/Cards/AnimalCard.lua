@@ -38,12 +38,22 @@ local function AnimalCard(props, hooks)
 			BackgroundTransparency = 1,
 		}),
 
-		Buy = Roact.createElement("ImageButton", {
+		AmountText = Roact.createElement("TextLabel", {
+			Position = UDim2.new(0, 5, 0.715, 0),
+			Size = UDim2.new(1, -12, 0, 24),
+			Text = `Owned: {props.Amount}`,
+			Font = Enum.Font.FredokaOne,
+			TextSize = 16,
+			TextColor3 = ColorPallete.DarkBG,
+			BackgroundTransparency = 1,
+		}),
+
+		Button = Roact.createElement("ImageButton", {
 			Size = UDim2.new(1, -16, 0, 34),
 			Position = UDim2.new(0, 8, 1, -42),
 			BackgroundColor3 = ColorPallete.Shop_Yellow,
 			[Roact.Event.MouseButton1Click] = function()
-				props.OnBuy(props.Id)
+				props.OnButtonClick(props.Id)
 			end,
 		}, {
 			UICorner = Roact.createElement("UICorner", {
@@ -51,7 +61,7 @@ local function AnimalCard(props, hooks)
 			}),
 			Text = Roact.createElement("TextLabel", {
 				Size = UDim2.fromScale(1, 1),
-				Text = `{props.Price} Gold`,
+				Text = props.ButtonText,
 				Font = Enum.Font.FredokaOne,
 				TextSize = 18,
 				BackgroundTransparency = 1,

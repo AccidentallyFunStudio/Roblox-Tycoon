@@ -23,7 +23,7 @@ local function HUD(_, hooks)
 		}, {
 			TopFrame = Roact.createElement(TopFrame),
             LeftFrame = Roact.createElement(LeftFrame),
-			BottomFrame = Roact.createElement(BottomFrame)
+			-- BottomFrame = Roact.createElement(BottomFrame)
 		}),
 	})
     

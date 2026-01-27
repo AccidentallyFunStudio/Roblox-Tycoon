@@ -1,9 +1,9 @@
 return {
 	Gold = 1500,
 	Eggs = {
-		["Small"] = 2,
-		["Medium"] = 1,
-		["Large"] = 0,
+		Egg_Small = 2,
+		Egg_Medium = 1,
+		Egg_Large = 0,
 	},
 	Biomes = {
 		["Biome_Forest"] = {
@@ -21,4 +21,5 @@ return {
 			Level = 0
 		}
 	},
+	Animals = {}
 }

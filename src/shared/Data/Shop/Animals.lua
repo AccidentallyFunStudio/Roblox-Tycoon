@@ -5,7 +5,7 @@ return table.freeze({
 		Rarity = "Rare",
 		Biome = "Forest",
 		GoldProduction = 1,
-		Probability = "20%",
+		Probability = 0.2,
 		Image = "rbxassetid://97808348618703",
 	},
 
@@ -15,7 +15,7 @@ return table.freeze({
 		Rarity = "Rare",
 		Biome = "Forest",
 		GoldProduction = 2,
-		Probability = "15%",
+		Probability = 0.15,
 		Image = "rbxassetid://77562928363387",
 	},
 
@@ -25,7 +25,7 @@ return table.freeze({
 		Rarity = "Rare",
 		Biome = "Prehistoric",
 		GoldProduction = 3,
-		Probability = "12%",
+		Probability = 0.12,
 		Image = "rbxassetid://129832804086613",
 	},
 
@@ -35,7 +35,7 @@ return table.freeze({
 		Rarity = "Rare",
 		Biome = "Prehistoric",
 		GoldProduction = 4,
-		Probability = "10%",
+		Probability = 0.1,
 		Image = "rbxassetid://103873825726555",
 	},
 
@@ -45,8 +45,8 @@ return table.freeze({
 		Rarity = "Rare",
 		Biome = "Olympus",
 		GoldProduction = 6,
-		Probability = "4%",
-		Image = "",
+		Probability = 0.04,
+		Image = "rbxassetid://104394012732284",
 	},
 
 	{
@@ -55,8 +55,8 @@ return table.freeze({
 		Rarity = "Rare",
 		Biome = "Olympus",
 		GoldProduction = 9,
-		Probability = "3%",
-		Image = "",
+		Probability = 0.03,
+		Image = "rbxassetid://113961499571650",
 	},
 
 	{
@@ -65,7 +65,7 @@ return table.freeze({
 		Rarity = "Epic",
 		Biome = "Forest",
 		GoldProduction = 5,
-		Probability = "9%",
+		Probability = 0.09,
 		Image = "rbxassetid://123705524188115",
 	},
 
@@ -75,7 +75,7 @@ return table.freeze({
 		Rarity = "Epic",
 		Biome = "Forest",
 		GoldProduction = 8,
-		Probability = "8%",
+		Probability = 0.08,
 		Image = "rbxassetid://115909403839971",
 	},
 
@@ -85,7 +85,7 @@ return table.freeze({
 		Rarity = "Epic",
 		Biome = "Prehistoric",
 		GoldProduction = 10,
-		Probability = "7%",
+		Probability = 0.07,
 		Image = "rbxassetid://130030473802224",
 	},
 
@@ -95,7 +95,7 @@ return table.freeze({
 		Rarity = "Epic",
 		Biome = "Prehistoric",
 		GoldProduction = 12,
-		Probability = "4.5%",
+		Probability = 0.045,
 		Image = "rbxassetid://109018460046652",
 	},
 
@@ -105,8 +105,8 @@ return table.freeze({
 		Rarity = "Epic",
 		Biome = "Olympus",
 		GoldProduction = 15,
-		Probability = "2.5%",
-		Image = "",
+		Probability = 0.025,
+		Image = "rbxassetid://94553430498361",
 	},
 
 	{
@@ -115,7 +115,7 @@ return table.freeze({
 		Rarity = "Legendary",
 		Biome = "Forest",
 		GoldProduction = 20,
-		Probability = "2%",
+		Probability = 0.02,
 		Image = "rbxassetid://136052225897847",
 	},
 
@@ -125,7 +125,7 @@ return table.freeze({
 		Rarity = "Legendary",
 		Biome = "Prehistoric",
 		GoldProduction = 23,
-		Probability = "1.5%",
+		Probability = 0.015,
 		Image = "rbxassetid://121779358180577",
 	},
 
@@ -135,8 +135,8 @@ return table.freeze({
 		Rarity = "Legendary",
 		Biome = "Olympus",
 		GoldProduction = 25,
-		Probability = "1%",
-		Image = "",
+		Probability = 0.01,
+		Image = "rbxassetid://80483696692623",
 	},
 
 	{
@@ -145,7 +145,7 @@ return table.freeze({
 		Rarity = "Legendary",
 		Biome = "Olympus",
 		GoldProduction = 35,
-		Probability = "0.5%",
-		Image = "",
+		Probability = 0.05,
+		Image = "rbxassetid://105680271501324",
 	},
 })

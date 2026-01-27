@@ -1,12 +1,11 @@
 -- Game Services
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local StarterPlayer = game:GetService("StarterPlayer")
 
 -- Packages
 local Knit = require(ReplicatedStorage.Packages.Knit)
-local Store = require(StarterPlayer.StarterPlayerScripts.Client.Rodux.Store)
 
 -- Knit Services
+local DataService
 local EggService
 
 -- EggController
@@ -17,23 +16,43 @@ local EggController = Knit.CreateController({
 --|| Functions ||--
 
 function EggController:BuyEgg(eggType: string)
-	EggService = Knit.GetService("EggService")
+	if not EggService then
+		EggService = Knit.GetService("EggService")
+	end
 
 	local success, result = EggService:BuyEgg(eggType):await()
-
 	if not success then
-		warn("Egg purchase failed:", result)
+		warn(`[Egg Controller] Egg purchase failed: {result}`)
+	end
+end
+
+function EggController:HatchEgg(eggtype: string)
+	if not EggService then
+		EggService = Knit.GetService("EggService")
+	end
+
+	if not DataService then
+		DataService = Knit.GetService("DataService")
+	end
+
+	local pSuccess, fSuccess, animalsHatched = EggService:HatchEgg(eggtype):await()
+	if pSuccess and fSuccess then
+		print(`[Egg Controller] Successfully hatched: {animalsHatched}`)
+
+		local success, updatedData = DataService:GetData():await()
+		if success and updatedData.Animals then
+			print(`[Egg Controller] Updated Animal Inventory: {updatedData.Animals}`)
+		end
+	else
+		warn(`[Egg Controller] Hatch failed or encountered an error`)
 	end
 end
 
 function EggController:KnitStart()
-	-- EggService.PurchaseResult:Connect(function(success, eggType, goldLeft)
-	-- 	if success then
-	-- 		print("Purchased:", eggType, "Gold left:", goldLeft)
-	-- 	else
-	-- 		warn("Egg purchase failed")
-	-- 	end
-	-- end)
+	DataService = Knit.GetService("DataService")
+	EggService = Knit.GetService("EggService")
+
+	print(`[Egg Controller] Controller started.`)
 end
 
 return EggController

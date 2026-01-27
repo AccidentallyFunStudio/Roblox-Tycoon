@@ -16,9 +16,17 @@ local ItemCard = require(StarterPlayerScripts.Client.Roact.Components.ItemCard)
 local BiomeCard = require(StarterPlayerScripts.Client.Roact.Components.Cards.BiomeCard)
 
 function BiomesPanel(props, hooks)
-	local biomeCards = {}
+	local biomeList = {}
+	for _, biome in pairs(Biomes) do
+		table.insert(biomeList, biome)
+	end
 
-	for _, item in ipairs(Biomes) do
+	table.sort(biomeList, function(a, b)
+		return a.LayoutOrder < b.LayoutOrder
+	end)
+
+	local biomeCards = {}
+	for _, item in ipairs(biomeList) do
 		biomeCards[item.Id] = Roact.createElement(BiomeCard, {
 			Name = item.Name,
 			Description = item.Description,

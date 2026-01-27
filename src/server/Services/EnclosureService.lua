@@ -81,15 +81,15 @@ function EnclosureService:StartProduction()
 
 							biome:SetAttribute("StoredCoins", newTotal)
 
-							print(
-								string.format(
-									"[Enclosure Service] %s | %s +%d (Total: %d)",
-									enclosure.Name,
-									biome.Name,
-									cps,
-									newTotal
-								)
-							)
+							-- print(
+							-- 	string.format(
+							-- 		"[Enclosure Service] %s | %s +%d (Total: %d)",
+							-- 		enclosure.Name,
+							-- 		biome.Name,
+							-- 		cps,
+							-- 		newTotal
+							-- 	)
+							-- )
                         end
                     end
                 end

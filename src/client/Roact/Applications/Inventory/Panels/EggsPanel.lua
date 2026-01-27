@@ -3,6 +3,7 @@ local StarterPlayerScripts = game:GetService("StarterPlayer").StarterPlayerScrip
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Packages
+local Knit = require(ReplicatedStorage.Packages.Knit)
 local Roact = require(ReplicatedStorage.Packages.Roact)
 local RoactHooks = require(ReplicatedStorage.Packages.Hooks)
 local RoduxHooks = require(ReplicatedStorage.Packages.Roduxhooks)
@@ -15,6 +16,8 @@ local Eggs = require(ReplicatedStorage.Shared.Data.Shop.Eggs)
 local EggCard = require(StarterPlayerScripts.Client.Roact.Components.Cards.EggCard)
 
 function EggsPanel(props, hooks)
+	local EggController = Knit.GetController("EggController")
+
 	local eggList = {}
 	for _, egg in pairs(Eggs) do
 		table.insert(eggList, egg)
@@ -41,7 +44,7 @@ function EggsPanel(props, hooks)
             Action = {
                 Label = `Hatch`,
 		        OnClick = function()
-			    print(`{egg.Name} hatched.`)
+			    EggController:HatchEgg(egg.Id)
 		end,
             }
 		})

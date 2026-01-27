@@ -41,12 +41,12 @@ function EggsPanel(props, hooks)
 			Image = egg.Image,
 			Owned = eggsState[egg.Id] or 0,
 			LayoutOrder = egg.LayoutOrder,
-            Action = {
-                Label = `Hatch`,
-		        OnClick = function()
-			    EggController:HatchEgg(egg.Id)
-		end,
-            }
+			Action = {
+				Label = `Hatch`,
+				OnClick = function()
+					EggController:HatchEgg(egg.Id)
+				end,
+			},
 		})
 	end
 

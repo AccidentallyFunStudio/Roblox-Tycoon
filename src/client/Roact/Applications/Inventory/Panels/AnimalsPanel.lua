@@ -22,33 +22,44 @@ local UIActions = require(StarterPlayerScripts.Client.Rodux.Actions.UIActions)
 
 function AnimalsPanel(props, hooks)
 	local data, setData = hooks.useState(nil)
-    local dispatch = RoduxHooks.useDispatch(hooks)
+	local dispatch = RoduxHooks.useDispatch(hooks)
 
-    hooks.useEffect(function()
-        Knit.OnStart():andThen(function()
-            local DataService = Knit.GetService("DataService")
-            DataService.GetData():andThen(function(playerData)
-                if playerData then
-                    setData(playerData)
-                end
-            end)
-        end)
-    end, {})
+	hooks.useEffect(function()
+		local DataService = Knit.GetService("DataService")
 
-    -- Loading state while waiting for DataService
-    if not data then
-        return Roact.createElement("TextLabel", {
-            Text = "Loading Animals...",
-            Size = UDim2.fromScale(1, 1),
-            BackgroundTransparency = 1,
-            Font = Enum.Font.FredokaOne,
-            TextSize = 24,
-        })
-    end
+		-- 1. Initial Fetch
+		DataService.GetData():andThen(function(playerData)
+			if playerData then
+				setData(playerData)
+			end
+		end)
+
+		-- 2. Listen for Live Updates (Hatching, Upgrading, etc.)
+		local connection = DataService.DataChanged:Connect(function(newData)
+			-- This updates the local 'data' state, triggering a re-render
+			setData(newData)
+		end)
+
+		-- 3. Cleanup connection when panel closes
+		return function()
+			connection:Disconnect()
+		end
+	end, {})
+
+	-- Loading state while waiting for DataService
+	if not data then
+		return Roact.createElement("TextLabel", {
+			Text = "Loading Animals...",
+			Size = UDim2.fromScale(1, 1),
+			BackgroundTransparency = 1,
+			Font = Enum.Font.FredokaOne,
+			TextSize = 24,
+		})
+	end
 
 	local animalCards = {}
 	for _, animal in ipairs(Animals) do
-        local amountOwned = (data.Animals and data.Animals[animal.Id]) or 0
+		local amountOwned = (data.Animals and data.Animals[animal.Id]) or 0
 		animalCards[animal.Id] = Roact.createElement(AnimalCard, {
 			Id = animal.Id,
 			Name = animal.Name,
@@ -56,13 +67,13 @@ function AnimalsPanel(props, hooks)
 			Biome = animal.Biome,
 			Image = animal.Image,
 			Amount = amountOwned,
-            ButtonText = amountOwned > 0 and "Add to Biome" or "Hatch Egg",
+			ButtonText = amountOwned > 0 and "Add to Biome" or "Hatch Egg",
 			OnButtonClick = function(value)
 				if data.Animals[animal.Id] ~= nil then
-					Store:dispatch(UIActions.ShowNotification(`Adding {animal.Name} to Biome!`))
+					-- Store:dispatch(UIActions.ShowNotification(`Adding {animal.Name} to Biome!`))
 				else
-					Store:dispatch(UIActions.ShowNotification("You need to hatch an egg first!"))
-                    Store:dispatch(UIActions.SetCurrentTab("Eggs"))
+					-- Store:dispatch(UIActions.ShowNotification("You need to hatch an egg first!"))
+					Store:dispatch(UIActions.SetCurrentTab("Eggs"))
 				end
 			end,
 		})

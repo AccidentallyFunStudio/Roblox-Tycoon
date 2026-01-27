@@ -63,7 +63,7 @@ function BiomesPanel(props, hooks)
 
 	local biomeCards = {}
 	for _, biome in ipairs(biomeList) do
-		local biomeState = data.Biomes[biome.Id]
+		local biomeState = data and data.Biomes and data.Biomes[biome.Id]
 		local currentLevel = biomeState and biomeState.Level or 0
 		local isMaxed = currentLevel >= biome.MaxLevel
 

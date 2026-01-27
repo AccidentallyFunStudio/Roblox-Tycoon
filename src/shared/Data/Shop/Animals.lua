@@ -1,5 +1,5 @@
 return table.freeze({
-	{
+	Animal_Ostrich = {
 		Id = "Animal_Ostrich",
 		Name = "Ostrich",
 		Rarity = "Rare",
@@ -9,7 +9,7 @@ return table.freeze({
 		Image = "rbxassetid://97808348618703",
 	},
 
-	{
+	Animal_Crocodile = {
 		Id = "Animal_Crocodile",
 		Name = "Crocodile",
 		Rarity = "Rare",
@@ -19,7 +19,7 @@ return table.freeze({
 		Image = "rbxassetid://77562928363387",
 	},
 
-	{
+	Animal_Pterodactyl = {
 		Id = "Animal_Pterodactyl",
 		Name = "Pterodactyl",
 		Rarity = "Rare",
@@ -29,7 +29,7 @@ return table.freeze({
 		Image = "rbxassetid://129832804086613",
 	},
 
-	{
+	Animal_Diplodocus = {
 		Id = "Animal_Diplodocus",
 		Name = "Diplodocus",
 		Rarity = "Rare",
@@ -39,7 +39,7 @@ return table.freeze({
 		Image = "rbxassetid://103873825726555",
 	},
 
-	{
+	Animal_Eagle = {
 		Id = "Animal_Eagle",
 		Name = "Griffin",
 		Rarity = "Rare",
@@ -49,7 +49,7 @@ return table.freeze({
 		Image = "rbxassetid://104394012732284",
 	},
 
-	{
+	Animal_Phoenix = {
 		Id = "Animal_Phoenix",
 		Name = "Phoenix",
 		Rarity = "Rare",
@@ -59,7 +59,7 @@ return table.freeze({
 		Image = "rbxassetid://113961499571650",
 	},
 
-	{
+	Animal_Elephant = {
 		Id = "Animal_Elephant",
 		Name = "Elephant",
 		Rarity = "Epic",
@@ -69,7 +69,7 @@ return table.freeze({
 		Image = "rbxassetid://123705524188115",
 	},
 
-	{
+	Animal_Lion = {
 		Id = "Animal_Lion",
 		Name = "Lion",
 		Rarity = "Epic",
@@ -79,7 +79,7 @@ return table.freeze({
 		Image = "rbxassetid://115909403839971",
 	},
 
-	{
+	["Animal_T-Rex"] = {
 		Id = "Animal_T-Rex",
 		Name = "T-Rex",
 		Rarity = "Epic",
@@ -89,7 +89,7 @@ return table.freeze({
 		Image = "rbxassetid://130030473802224",
 	},
 
-	{
+	Animal_Stegosaurus = {
 		Id = "Animal_Stegosaurus",
 		Name = "Stegosaurus",
 		Rarity = "Epic",
@@ -99,7 +99,7 @@ return table.freeze({
 		Image = "rbxassetid://109018460046652",
 	},
 
-	{
+	Animal_Dragon = {
 		Id = "Animal_Dragon",
 		Name = "Dragon",
 		Rarity = "Epic",
@@ -109,7 +109,7 @@ return table.freeze({
 		Image = "rbxassetid://94553430498361",
 	},
 
-	{
+	Animal_Tiger = {
 		Id = "Animal_Tiger",
 		Name = "Tiger",
 		Rarity = "Legendary",
@@ -119,7 +119,7 @@ return table.freeze({
 		Image = "rbxassetid://136052225897847",
 	},
 
-	{
+	Animal_Chimera = {
 		Id = "Animal_Chimera",
 		Name = "Chimera",
 		Rarity = "Legendary",
@@ -129,7 +129,7 @@ return table.freeze({
 		Image = "rbxassetid://121779358180577",
 	},
 
-	{
+	Animal_MagicButterfly = {
 		Id = "Animal_MagicButterfly",
 		Name = "Magic Butterfly",
 		Rarity = "Legendary",
@@ -139,7 +139,7 @@ return table.freeze({
 		Image = "rbxassetid://80483696692623",
 	},
 
-	{
+	Animal_MagicDragon = {
 		Id = "Animal_MagicDragon",
 		Name = "Magic Dragon",
 		Rarity = "Legendary",

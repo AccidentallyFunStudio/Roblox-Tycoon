@@ -4,9 +4,15 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- Packages
 local Knit = require(ReplicatedStorage.Packages.Knit)
 
+-- Knit Services
+local DataService
+
 -- Configuration
 local MAX_SERVER_DIST = 1100 -- Slightly higher than client (100) to account for latency
-local BiomesConfig = require(ReplicatedStorage.Shared.Data.Shop.Biomes)
+
+-- Data
+local AnimalsData = require(ReplicatedStorage.Shared.Data.Shop.Animals)
+local BiomesData = require(ReplicatedStorage.Shared.Data.Shop.Biomes)
 
 local PlacementService = Knit.CreateService({
 	Name = "PlacementService",
@@ -15,93 +21,116 @@ local PlacementService = Knit.CreateService({
 
 -- || Functions || --
 
-function PlacementService:PlaceItem(
-	player: Player,
-	itemName: string,
-	targetCFrame: CFrame,
-	targetFloor: Instance
-): boolean
-	-- Is it actually a floor?
-	if not targetFloor:IsA("BasePart") or not targetFloor:HasTag("PlacableFloor") then
-		warn(player.Name .. " attempted to place on a non-floor object.")
-		return false
-	end
-
-	-- Validate the Enclosure
+function PlacementService:PlaceItem(player: Player, itemName: string, targetCFrame: CFrame, targetFloor: Instance): boolean
+	-- Validation
+	if not targetFloor:IsA("BasePart") or not targetFloor:HasTag("PlacableFloor") then return false end
 	local enclosure = targetFloor:FindFirstAncestorOfClass("Model")
-	if not enclosure then
-		warn("Floor part is not inside an Enclosure model")
-		return false
-	end
+	if not enclosure or enclosure:GetAttribute("OwnerUserId") ~= player.UserId then return false end
 
-	-- Ownership Validation
-	local ownerId = enclosure:GetAttribute("OwnerUserId")
-	if ownerId ~= player.UserId then
-		warn(player.Name .. " tried to place in an enclosure they do not own!")
-		return false
-	end
+	-- Distance Check
+	local char = player.Character
+	if not char or (char:GetPivot().Position - targetCFrame.Position).Magnitude > 110 then return false end
 
-	-- Character & Distance Validation
-	local character = player.Character
-	if not character then
-		return false
-	end
+	-- 1. Physical Placement
+	local itemTemplate = ReplicatedStorage.Assets.Biomes:FindFirstChild(itemName)
+	if not itemTemplate then return false end
 
-	local rootPart = character:FindFirstChild("HumanoidRootPart") :: BasePart
-	if not rootPart then
-		return false
-	end
-
-	-- Check if the placement point is within the allowed distance from the player
-	local distance = (rootPart.Position - targetCFrame.Position).Magnitude
-	if distance > MAX_SERVER_DIST then
-		warn(player.Name .. " attempted to place too far away: " .. math.round(distance) .. " studs")
-		return false
-	end
-
-	-- Asset Retrieval
-	local itemTemplate = game.ServerStorage.Assets.Biomes:FindFirstChild(itemName)
-	if not itemTemplate then
-		warn("Item " .. itemName .. " does not exist in ServerStorage.Items")
-		return false
-	end
-
-	-- Placement
-	local newItem = itemTemplate:Clone()
-
-	if newItem:IsA("Model") or newItem:IsA("BasePart") then
-		newItem:PivotTo(targetCFrame)
-	end
-
+	-- Cleanup existing physical biome of same type before placing new one
 	local baseId = itemName:match("(.+)_%d+$") or itemName
-	local BiomeData = BiomesConfig[baseId]
-
-	if BiomeData then
-		-- Retrieve level from the name suffix to get correct capacity
-		local level = tonumber(itemName:match("_(%d+)$")) or 1
-
-		newItem:SetAttribute("Level", level)
-		newItem:SetAttribute("MaxCapacity", BiomeData.Capacities[level] or BiomeData.Capacities[1])
-		newItem:SetAttribute("AnimalCount", 0)
-		print(`[Server] Initialized {itemName} at Level {level}`)
-	else
-		warn(`[Server] No config found for BaseId: {baseId}`)
+	for _, child in ipairs(enclosure:GetChildren()) do
+		if child:IsA("Model") and (child:GetAttribute("BiomeId") == baseId or child.Name:match("^"..baseId)) then
+			child:Destroy()
+		end
 	end
 
+	local newItem = itemTemplate:Clone()
+	newItem:PivotTo(targetCFrame)
+	newItem:SetAttribute("BiomeId", baseId) -- Critical for identification
+	newItem:SetAttribute("OwnerUserId", player.UserId)
 	newItem.Parent = enclosure
 
-	local DataService = Knit.GetService("DataService")
-    local data = DataService:GetData(player) --
-    if data then
-        if not data.Placements then data.Placements = {} end --
-        
-        table.insert(data.Placements, {
-            Name = itemName,
-            Transform = {targetCFrame:GetComponents()} -- This is safe for DataStores
-        })
-    end
+	-- 2. Data Persistence (The Fix for Duplication)
+	local data = DataService:GetData(player)
+	if data then
+		if not data.Placements then data.Placements = {} end
+		
+		local existingIndex = nil
+		for i, p in ipairs(data.Placements) do
+			local pBaseId = p.Name:match("(.+)_%d+$") or p.Name
+			if pBaseId == baseId then
+				existingIndex = i
+				break
+			end
+		end
+
+		local placementEntry = {
+			Name = itemName,
+			Transform = {targetCFrame:GetComponents()},
+			Animals = (existingIndex and data.Placements[existingIndex].Animals) or {}
+		}
+
+		if existingIndex then
+			data.Placements[existingIndex] = placementEntry
+		else
+			table.insert(data.Placements, placementEntry)
+		end
+	end
 
 	return true
+end
+
+function PlacementService:PlaceAnimalManual(player: Player, biomeModel: Model, animalId: string): boolean
+    -- 1. Validate Biome Ownership
+    local enclosure = biomeModel:FindFirstAncestorOfClass("Model")
+    if not enclosure or enclosure:GetAttribute("OwnerUserId") ~= player.UserId then
+        warn("[PlacementService] Player does not own this enclosure.")
+        return false
+    end
+
+    -- 2. Capacity Check using Procedural Attributes
+    local currentCount = biomeModel:GetAttribute("AnimalCount") or 0
+    local maxCapacity = biomeModel:GetAttribute("Capacity") or 0 -- Set in BiomeService:InitBiomes
+
+    if currentCount >= maxCapacity then
+        warn("[PlacementService] Biome is at max capacity!")
+        return false
+    end
+
+    -- 3. Locate Folders
+    local positionsFolder = biomeModel:FindFirstChild("Positions")
+    local animalsFolder = biomeModel:FindFirstChild("Animals") or Instance.new("Folder", biomeModel)
+    animalsFolder.Name = "Animals"
+
+    -- 4. Spawn Animal from Workspace/Assets/Animals/
+    local animalTemplate = game.Workspace.Assets.Animals:FindFirstChild(animalId)
+    local spawnPart = positionsFolder and positionsFolder:FindFirstChild(tostring(currentCount + 1))
+
+    if animalTemplate and spawnPart then
+        local newAnimal = animalTemplate:Clone()
+        newAnimal:PivotTo(spawnPart.CFrame)
+        newAnimal.Parent = animalsFolder
+        
+        -- Update Attribute for tracking
+        biomeModel:SetAttribute("AnimalCount", currentCount + 1)
+        
+        -- 5. Save to Data for Persistence
+        local DataService = Knit.GetService("DataService")
+        local data = DataService:GetData(player)
+        if data and data.Placements then
+            for _, placement in ipairs(data.Placements) do
+                -- Find the specific placement entry by matching the biome instance name
+                if placement.InstanceName == biomeModel.Name then
+                    placement.Animals = placement.Animals or {}
+                    table.insert(placement.Animals, animalId)
+                    break
+                end
+            end
+        end
+        
+        return true
+    end
+
+    return false
 end
 
 function PlacementService:AutoPlaceAnimal(player: Player, animalId: string): boolean
@@ -172,6 +201,14 @@ function PlacementService.Client:PlaceItem(
 	targetFloor: Instance
 )
 	return self.Server:PlaceItem(player, itemName, targetCFrame, targetFloor)
+end
+
+-- || Knit Lifecycle || --
+
+function PlacementService:KnitStart()
+	DataService = Knit.GetService("DataService")
+
+	print("[Placement Service] Service started.")
 end
 
 return PlacementService

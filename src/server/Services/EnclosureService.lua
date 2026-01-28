@@ -7,7 +7,8 @@ local Workspace = game:GetService("Workspace")
 local EnclosureService = Knit.CreateService({
 	Name = "EnclosureService",
 	Client = {
-		GoldCollected = Knit.CreateSignal()
+		GoldCollected = Knit.CreateSignal(),
+		ZooReady = Knit.CreateSignal()
 	},
 })
 
@@ -105,6 +106,11 @@ function EnclosureService:AssignEnclosure(player: Player)
 			end)
 		end
 	end
+
+	-- After everything is placed, notify the client
+    task.defer(function()
+        self.Client.ZooReady:Fire(player)
+    end)
 
 	print(`[Enclosure Service] Assigned and Loaded {enclosure.Name} for {player.Name}`)
 end

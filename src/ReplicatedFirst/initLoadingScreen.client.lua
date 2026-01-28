@@ -1,9 +1,9 @@
 -- Const
 local BACKGROUND_COLOR = Color3.new(1, 1, 1)
-local PROGRESS_BAR_BG_COLOR = Color3.new(0, 0, 0)  -- Black background
+local PROGRESS_BAR_BG_COLOR = Color3.new(0, 0, 0) -- Black background
 local PROGRESS_BAR_FILL_COLOR = Color3.new(1, 1, 1) -- White fill
 local PROGRESS_BAR_POSITION = UDim2.fromScale(0.5, 0.48)
-local PROGRESS_BAR_SIZE = UDim2.fromScale(1.8, 0.6)  -- Made it a bit bigger
+local PROGRESS_BAR_SIZE = UDim2.fromScale(1.8, 0.6) -- Made it a bit bigger
 local PROGRESS_BAR_CORNER_RADIUS = UDim.new(0, 5)
 local TEXT_POSITION = UDim2.fromScale(0.5, 0.6)
 local TEXT_SIZE = UDim2.fromScale(0.9, 0.94)
@@ -28,7 +28,7 @@ BottomLeftImage.Parent = ImageLabelBackground
 BottomLeftImage.Name = "BottomLeftImage"
 BottomLeftImage.Size = UDim2.fromScale(0.32, 0.42)
 BottomLeftImage.BackgroundTransparency = 1
-BottomLeftImage.Position = UDim2.fromScale(0.35,0.7)
+BottomLeftImage.Position = UDim2.fromScale(0.35, 0.7)
 
 local UIAspectRatio = Instance.new("UIAspectRatioConstraint")
 UIAspectRatio.AspectRatio = 2.83
@@ -40,7 +40,7 @@ Background.Name = "Background"
 Background.Parent = BottomLeftImage
 Background.BackgroundColor3 = PROGRESS_BAR_BG_COLOR
 Background.AnchorPoint = Vector2.new(0.5, 0.5)
-Background.BorderColor3 = Color3.fromRGB(255,255,255)
+Background.BorderColor3 = Color3.fromRGB(255, 255, 255)
 Background.BorderSizePixel = 3
 Background.Position = PROGRESS_BAR_POSITION
 Background.Size = PROGRESS_BAR_SIZE
@@ -51,7 +51,7 @@ UICorner.Parent = Background
 
 local UIStroke = Instance.new("UIStroke")
 UIStroke.Parent = Background
-UIStroke.Color = Color3.fromRGB(255, 255, 255)  -- White border
+UIStroke.Color = Color3.fromRGB(255, 255, 255) -- White border
 UIStroke.Thickness = 2
 
 -- Fill bar
@@ -83,7 +83,6 @@ local UIAspectRatio = Instance.new("UIAspectRatioConstraint")
 UIAspectRatio.AspectRatio = 2.83
 UIAspectRatio.Parent = TextLabel
 
-
 -- wait for the loading screen
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
@@ -92,9 +91,9 @@ LoadingUI.Parent = playerGUI
 
 -- Function to clean up when loading is done
 local function cleanupLoading()
-    if LoadingUI and LoadingUI.Parent then
-        LoadingUI:Destroy()
-    end
+	if LoadingUI and LoadingUI.Parent then
+		LoadingUI:Destroy()
+	end
 end
 
 task.wait(0.1)
@@ -102,7 +101,40 @@ task.wait(0.1)
 -- Remove the default loading screen
 game.ReplicatedFirst:RemoveDefaultLoadingScreen()
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Knit = require(ReplicatedStorage.Packages.Knit)
+
+-- Function to handle the removal
+local function finishLoading()
+	local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+	local tween = game:GetService("TweenService")
+		:Create(ImageLabelBackground, tweenInfo, { BackgroundTransparency = 1 })
+
+	-- Fade out elements
+	Fill:TweenSize(UDim2.new(1, 0, 1, 0), "Out", "Quart", 0.5)
+	TextLabel.Text = "Welcome to God Zoo!"
+
+	task.wait(1)
+	tween:Play()
+	tween.Completed:Wait()
+	LoadingUI:Destroy()
+end
+
+-- Wait for Knit to Start
+Knit.OnStart():andThen(function()
+	local EnclosureService = Knit.GetService("EnclosureService")
+
+	-- Update text so player knows data is being fetched
+	TextLabel.Text = "Loading Zoo Data..."
+	Fill:TweenSize(UDim2.new(0.8, 0, 1, 0), "Out", "Quart", 2)
+
+	-- The Magic Line: Wait for the server to say "I'm done building your zoo"
+	EnclosureService.ZooReady:Connect(function()
+		finishLoading()
+	end)
+end)
+
 return {
-    GUI = LoadingUI,
-    Cleanup = cleanupLoading
+	GUI = LoadingUI,
+	Cleanup = cleanupLoading,
 }

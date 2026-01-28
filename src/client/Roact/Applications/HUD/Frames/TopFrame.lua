@@ -2,6 +2,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Packages
+local Knit = require(ReplicatedStorage.Packages.Knit)
 local Roact = require(ReplicatedStorage.Packages.Roact)
 local RoactHooks = require(ReplicatedStorage.Packages.Hooks)
 local RoduxHooks = require(ReplicatedStorage.Packages.Roduxhooks)
@@ -12,9 +13,30 @@ local Textures = require(ReplicatedStorage.Shared.Data.Textures.UI)
 
 -- TopFrame
 function TopFrame(_, hooks)
-	local coins = RoduxHooks.useSelector(hooks, function(state)
-		return state.CoinReducer.Coins
-	end)
+	local data, setData = hooks.useState(nil)
+	hooks.useEffect(function()
+		local DataService = Knit.GetService("DataService")
+
+		-- Yield specifically for the initial load
+		DataService.GetData():andThen(function(playerData)
+			if playerData then
+				setData(playerData)
+			end
+		end)
+		-- 2. Listen for Live Updates (Hatching, Upgrading, etc.)
+		local connection = DataService.DataChanged:Connect(function(newData)
+			-- This updates the local 'data' state, triggering a re-render
+			setData(newData)
+		end)
+
+		-- 3. Cleanup connection when panel closes
+		return function()
+			connection:Disconnect()
+		end
+	end, {})
+
+	local goldAmount = data and data.Gold or "Loading..."
+
 	return Roact.createElement("Frame", {
 		AnchorPoint = Vector2.new(1, 0),
 		Size = UDim2.new(0, 200, 0, 100),
@@ -46,7 +68,7 @@ function TopFrame(_, hooks)
 			Text = Roact.createElement("TextLabel", {
 				Size = UDim2.new(1, -45, 1, 0),
 				Position = UDim2.new(0, 40, 0, 0),
-				Text = `{coins}`,
+				Text = `{goldAmount}`,
 				TextColor3 = ColorPallete["Text"],
 				Font = Enum.Font.GothamBold,
 				TextSize = 24,

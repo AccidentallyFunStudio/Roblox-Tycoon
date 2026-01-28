@@ -9,6 +9,7 @@ local GoldService = Knit.CreateService({
 
 local AnimalsData = require(ReplicatedStorage.Shared.Data.Shop.Animals)
 local DataService
+local EnclosureService
 
 function GoldService:CalculateIncome()
 	local players = game.Players:GetPlayers()
@@ -61,14 +62,15 @@ function GoldService:CollectGold(player: Player)
 		data.Gold += amount
 		self.PendingGold[player.UserId] = 0
 		
-		-- Fire signal to update UI or play sound
 		DataService.Client.DataChanged:Fire(player, data)
+		EnclosureService.Client.GoldCollected:Fire(player)
 		print(`{player.Name} collected {amount} Gold!`)
 	end
 end
 
 function GoldService:KnitStart()
 	DataService = Knit.GetService("DataService")
+	EnclosureService = Knit.GetService("EnclosureService")
 
 	-- Income Loop: Every 1 second
 	task.spawn(function()

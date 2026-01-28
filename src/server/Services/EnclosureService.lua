@@ -101,7 +101,6 @@ function EnclosureService:AssignEnclosure(player: Player)
 				-- Check if the player touching the plate is the actual owner
 				if player and enclosure:GetAttribute("OwnerUserId") == player.UserId then
 					Knit.GetService("GoldService"):CollectGold(player)
-					EnclosureService.Client.GoldCollected:Fire(player)
 				end
 			end)
 		end
@@ -200,68 +199,82 @@ function EnclosureService:GetPlayerEnclosure(player: Player)
 	return nil
 end
 
-function EnclosureService:RefreshPlacedBiome(player: Player, biomeId: string, newLevel: number)
-	local enclosure = self:GetPlayerEnclosure(player)
-	if not enclosure then
-		return
-	end
+function EnclosureService:RefreshPlacedBiome(player: Player, biomeId: string)
+    local data = DataService:GetData(player)
+    local enclosure = self:GetPlayerEnclosure(player)
+    if not data or not enclosure then return end
 
-	local oldCFrame = nil
-	local storedAnimals = {} -- Temporary list to hold animal IDs
+    local placement = nil
+    for _, p in ipairs(data.Placements) do
+        -- Matches "Biome_Forest" against "Biome_Forest_01/02/03"
+        if p.Name:match("^" .. biomeId) then
+            placement = p
+            break
+        end
+    end
 
-	-- 1. Find the old biome and gather existing animals
-	for _, child in ipairs(enclosure:GetChildren()) do
-		if child:IsA("Model") and child:GetAttribute("BiomeId") == biomeId then
-			oldCFrame = child:GetPivot()
+    if placement then
+        -- 1. IDENTIFY AND RESCUE LIVE ANIMALS
+        local oldBiomeModel = nil
+        local rescuedAnimals = {}
 
-			-- Grab IDs of animals currently in the biome
-			local animalsFolder = child:FindFirstChild("Animals")
-			if animalsFolder then
-				for _, animal in ipairs(animalsFolder:GetChildren()) do
-					-- Assuming animal model name matches its ID
-					table.insert(storedAnimals, animal.Name)
-				end
-			end
+        for _, child in ipairs(enclosure:GetChildren()) do
+            if child:IsA("Model") and child:GetAttribute("BiomeId") == biomeId then            
+                local animalsFolder = child:FindFirstChild("Animals")
+                if animalsFolder then
+                    -- Parent animals to the enclosure temporarily so they aren't destroyed
+                    for _, animal in ipairs(animalsFolder:GetChildren()) do
+                        animal.Parent = enclosure
+                        table.insert(rescuedAnimals, animal)
+                    end
+                end
+                child:Destroy() -- Safe to destroy the old biome now
+                break
+            end
+        end
 
-			child:Destroy()
-			break
-		end
-	end
-
-	-- 2. Spawn the new upgraded level
-	if oldCFrame then
-		local newModelName = string.format("%s_%02d", biomeId, newLevel)
-		local newTemplate = Workspace.Assets.Biomes:FindFirstChild(newModelName)
-
-		if newTemplate then
-			local newClone = newTemplate:Clone()
-			newClone:PivotTo(oldCFrame)
-			newClone.Parent = enclosure
-
-			-- Re-apply identifying attributes
+        -- 2. SPAWN NEW BIOME TIER
+        -- Assets must be in ReplicatedStorage for best results
+        local newTemplate = Workspace.Assets.Biomes:FindFirstChild(placement.Name)
+        if newTemplate then
+            local newClone = newTemplate:Clone()
+            newClone:PivotTo(CFrame.new(unpack(placement.Transform)))
+            newClone.Parent = enclosure
+            
 			newClone:SetAttribute("BiomeId", biomeId)
-			newClone:SetAttribute("Unlocked", true)
+            newClone:SetAttribute("OwnerUserId", player.UserId)
+			newClone:SetAttribute("BiomeLocked", true)
+            newClone.Parent = enclosure
+			
+            local animalsFolder = newClone:FindFirstChild("Animals")
+            if not animalsFolder then
+                animalsFolder = Instance.new("Folder")
+                animalsFolder.Name = "Animals"
+                animalsFolder.Parent = newClone
+            end
+            
+            local positionsFolder = newClone:FindFirstChild("Positions")
 
-			-- 3. Restore the animals into the new model's positions
-			if #storedAnimals > 0 then
-				local animalsFolder = Instance.new("Folder", newClone)
-				animalsFolder.Name = "Animals"
-				local positionsFolder = newClone:FindFirstChild("Positions")
+			-- 3. RESTORE ANIMALS TO NEW POSITIONS
+			for i, animalModel in ipairs(rescuedAnimals) do
+				animalModel.Parent = animalsFolder
 
-				for i, animalId in ipairs(storedAnimals) do
-					local animalTemplate = game.Workspace.Assets.Animals:FindFirstChild(animalId)
-					local spawnPart = positionsFolder and positionsFolder:FindFirstChild(tostring(i))
+				-- Snap to new position if it exists
+				local spawnPart = positionsFolder and positionsFolder:FindFirstChild(tostring(i))
+				if spawnPart then
+					-- Extract original rotation from the animal
+					local originalRotation = animalModel:GetPivot().Rotation
 
-					if animalTemplate and spawnPart then
-						local animalClone = animalTemplate:Clone()
-						animalClone:PivotTo(spawnPart.CFrame)
-						animalClone.Parent = animalsFolder
-					end
+					-- Combine new position with old rotation
+					local targetCFrame = CFrame.new(spawnPart.Position) * originalRotation
+
+					animalModel:PivotTo(targetCFrame)
 				end
-				newClone:SetAttribute("AnimalCount", #storedAnimals)
 			end
-		end
-	end
+            
+            newClone:SetAttribute("AnimalCount", #rescuedAnimals)
+        end
+    end
 end
 
 -- || Knit Lifecycle || --

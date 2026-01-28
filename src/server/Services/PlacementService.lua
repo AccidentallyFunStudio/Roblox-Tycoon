@@ -57,6 +57,25 @@ function PlacementService:PlaceItem(
 			end
 		end
 
+		local itemTemplate = Workspace.Assets.Biomes:FindFirstChild(itemName) 
+		if not itemTemplate then 
+            warn(`[PlacementService] Asset {itemName} not found in ReplicatedStorage!`)
+            return false 
+        end
+
+		local newItem = itemTemplate:Clone()
+		newItem:PivotTo(targetCFrame)
+		newItem:SetAttribute("BiomeId", baseId)
+		newItem:SetAttribute("OwnerUserId", player.UserId)
+		newItem.Parent = enclosure
+
+        -- -- Ensure physics and visibility replicate immediately
+        -- for _, part in ipairs(newItem:GetDescendants()) do
+        --     if part:IsA("BasePart") then
+        --         part:SetNetworkOwner(player)
+        --     end
+        -- end
+
 		-- If we reached here, no existing biome was found, so we can place a new one
 		local placementEntry = {
 			Name = itemName,

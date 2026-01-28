@@ -10,9 +10,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerModules = script.Parent.Parent.Modules
 local ProfileService = require(ServerModules.ProfileService)
 local ProfileTemplate = require(script.Parent.Parent.Constants.DataTemplate)
-local ProfileStore = ProfileService.GetProfileStore("DataTest_1_16", ProfileTemplate)
-
-local BiomesConfig = require(ReplicatedStorage.Shared.Data.Shop.Biomes)
+local ProfileStore = ProfileService.GetProfileStore("DataTest_1_20", ProfileTemplate)
 
 -- DataService
 local DataService = Knit.CreateService({

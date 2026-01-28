@@ -8,6 +8,8 @@ local TemplateReducer = require(Reducers.TemplateReducer)
 local CoinReducer = require(Reducers.CoinReducer)
 local UIReducer = require(Reducers.UIReducer)
 local EggReducer = require(Reducers.EggReducer)
+local QuestReducer = require(Reducers.QuestReducer)
+local ButtonPromptReducer = require(Reducers.ButtonPromptReducer)
 
 -- Modules
 local Rodux = require(ReplicatedStorage.Packages.Rodux)
@@ -17,7 +19,9 @@ local StoreReducer = Rodux.combineReducers({
 	TemplateReducer = TemplateReducer,
 	CoinReducer = CoinReducer,
 	UIReducer = UIReducer,
-	EggReducer = EggReducer
+	EggReducer = EggReducer,
+	QuestReducer = QuestReducer,
+	ButtonPromptReducer = ButtonPromptReducer
 })
 
 local Store = Rodux.Store.new(StoreReducer, nil, {})

@@ -56,19 +56,36 @@ function GoldService:CalculateIncome()
 end
 
 function GoldService:CollectGold(player: Player)
-	local amount = self.PendingGold[player.UserId] or 0
-	if amount > 0 then
-		local data = DataService:GetData(player)
-		data.Gold += amount
-		self.PendingGold[player.UserId] = 0
-		
-		Knit.GetService("QuestService"):CompleteCollectGold()
+    if not player then return end -- Guard against nil player
 
-		DataService.Client.DataChanged:Fire(player, data)
-		EnclosureService.Client.GoldCollected:Fire(player)
-		
-		print(`{player.Name} collected {amount} Gold!`)
-	end
+    local amount = self.PendingGold[player.UserId] or 0
+    if amount > 0 then
+        local data = DataService:GetData(player)
+        
+        if data then
+            -- Update the data
+            data.Gold += amount
+            self.PendingGold[player.UserId] = 0
+            
+            local QuestService = Knit.GetService("QuestService")
+            if QuestService and data.Tutorial.CurrentStep == 7 then
+                QuestService:CompleteCollectGold(player)
+            end
+
+            -- Update the Client and other services
+            DataService.Client.DataChanged:Fire(player, data)
+            
+            -- Verify EnclosureService is ready
+            local EnclosureService = Knit.GetService("EnclosureService")
+            if EnclosureService then
+                EnclosureService.Client.GoldCollected:Fire(player, data)
+            end
+            
+            print(`{player.Name} collected {amount} Gold!`)
+        else
+            warn(`[Gold Service] Could not find data for {player.Name}`)
+        end
+    end
 end
 
 function GoldService:KnitStart()

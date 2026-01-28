@@ -26,6 +26,7 @@ local HUD = require(Applications.HUD.Application)
 local Shop = require(Applications.Shop.Application)
 local Inventory = require(Applications.Inventory.Application)
 local Prompt = require(Applications.Prompt.Application)
+local Quest = require(Applications.Quest.Application)
 
 --local GlobalHoveredFrame = require(Applications.GlobalHoveredFrame.Application)
 
@@ -50,6 +51,7 @@ local function GameFrame(props)
 			Shop = Roact.createElement(Shop),
 			Inventory = Roact.createElement(Inventory),
 			Prompt = Roact.createElement(Prompt),
+			Quest = Roact.createElement(Quest)
 		}),
 	})
 end

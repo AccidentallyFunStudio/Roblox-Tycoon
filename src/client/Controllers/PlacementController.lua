@@ -1,11 +1,14 @@
 -- Game Services
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local StarterPlayer = game:GetService("StarterPlayer")
 local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
 -- Packages
 local Knit = require(ReplicatedStorage.Packages.Knit)
+local Store = require(StarterPlayer.StarterPlayerScripts.Client.Rodux.Store)
+local ButtonPromptActions = require(StarterPlayer.StarterPlayerScripts.Client.Rodux.Actions.ButtonPromptActions)
 
 -- Knit Services
 local PlacementService
@@ -33,6 +36,8 @@ function PlacementController:StartPlacement(itemName: string)
 	self.CurrentGhost.Name = itemName
 	self.CurrentGhost.Parent = workspace
 	self.IsPlacing = true
+
+	Store:dispatch(ButtonPromptActions.SetVisibility(true))
 end
 
 function PlacementController:StopPlacement()
@@ -41,6 +46,8 @@ function PlacementController:StopPlacement()
 		self.CurrentGhost:Destroy()
 		self.CurrentGhost = nil
 	end
+
+	Store:dispatch(ButtonPromptActions.SetVisibility(false))
 end
 
 function PlacementController:TogglePlacement(itemName: string)
@@ -257,6 +264,8 @@ function PlacementController:KnitStart()
 					if data and data.Tutorial and data.Tutorial.CurrentStep == 4 then
 						Knit.GetController("QuestController"):CompletePlaceBiome()
 					end
+
+					Store:dispatch(ButtonPromptActions.SetVisibility(false))
 
 					task.wait(0.3)
 					debounce = false

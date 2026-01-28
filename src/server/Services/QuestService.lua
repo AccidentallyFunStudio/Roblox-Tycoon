@@ -157,6 +157,20 @@ function QuestService:CompleteUpgradeBiome(player: Player)
     end
 end
 
+function QuestService:CompleteTutorial(player)
+    local data = DataService:GetData(player)
+    if not data then
+        warn(`[Quest Service] Unable to load data for Player {player}`)
+    end
+
+    if data and data.Tutorial then
+        data.Tutorial.Completed = true
+        DataService.Client.DataChanged:Fire(player, data)
+
+        print(`[Quest Service] Player {player} has completed tutorial {data.Tutorial.Completed}`)
+    end
+end
+
 --|| Client Functions ||--
 
 function QuestService.Client:VerifyTutorialStep(player: Player)
@@ -197,6 +211,10 @@ end
 
 function QuestService.Client:CompleteUpgradeBiome(player: Player)
     return self.Server:CompleteUpgradeBiome(player)
+end
+
+function QuestService.Client:CompleteTutorial(player: Player)
+    return self.Server:CompleteTutorial(player)
 end
 
 --|| Knit Lifecycle ||--

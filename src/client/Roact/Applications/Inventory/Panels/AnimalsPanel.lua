@@ -72,6 +72,7 @@ function AnimalsPanel(props, hooks)
 				if data.Animals[animal.Id] ~= nil then
 					local PlacementController = Knit.GetController("PlacementController")
 					PlacementController:TestAnimalPlacement(animal.Id)
+					Knit.GetController("QuestController"):CompletePlaceAnimal()
 					Store:dispatch(UIActions.ResetCurrentUI())
 					-- Store:dispatch(UIActions.ShowNotification(`Adding {animal.Name} to Biome!`))
 				else

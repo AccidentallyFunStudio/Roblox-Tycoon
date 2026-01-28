@@ -252,7 +252,12 @@ function PlacementController:KnitStart()
 						:catch(function(err)
 							warn(`[Placement Controller] Service Error: {err}`)
 						end)
-						
+					
+					local success, data = Knit.GetService("DataService"):GetData():await()
+					if data and data.Tutorial and data.Tutorial.CurrentStep == 4 then
+						Knit.GetController("QuestController"):CompletePlaceBiome()
+					end
+
 					task.wait(0.3)
 					debounce = false
 				end

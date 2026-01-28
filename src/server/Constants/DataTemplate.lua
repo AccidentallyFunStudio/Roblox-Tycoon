@@ -32,7 +32,9 @@ return {
 			[3] = "Go to Zoo",
 			[4] = "Place a Biome from Inventory",
 			[5] = "Hatch an Egg from Inventory",
-			[6] = "Place an Animal to Biome"
+			[6] = "Place an Animal to Biome",
+			[7] = "Collect Golds",
+			[8] = "Upgrade a Biome"
 		}
 	},
 }

@@ -205,6 +205,10 @@ function EnclosureService:GetPlayerEnclosure(player: Player)
 	return nil
 end
 
+function EnclosureService.Client:GetPlayerEnclosure(player)
+	return self.Server:GetPlayerEnclosure(player)
+end
+
 function EnclosureService:RefreshPlacedBiome(player: Player, biomeId: string)
     local data = DataService:GetData(player)
     local enclosure = self:GetPlayerEnclosure(player)

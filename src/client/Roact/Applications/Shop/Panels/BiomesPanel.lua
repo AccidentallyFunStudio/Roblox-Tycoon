@@ -100,8 +100,10 @@ function BiomesPanel(props, hooks)
 
 				if currentLevel == 0 then
 					Knit.GetService("BiomeService"):PurchaseBiome(biome.Id)
+					Knit.GetService("QuestService"):CompletePurchaseBiome()
 				elseif not isMaxed then
 					Knit.GetService("BiomeService"):UpgradeBiome(biome.Id)
+					Knit.GetService("QuestService"):CompleteUpgradeBiome()
 				end
 
 				Knit.GetController("AudioController"):PlaySFX("UI_Purchase")

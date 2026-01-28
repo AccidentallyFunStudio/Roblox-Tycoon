@@ -62,8 +62,11 @@ function GoldService:CollectGold(player: Player)
 		data.Gold += amount
 		self.PendingGold[player.UserId] = 0
 		
+		Knit.GetService("QuestService"):CompleteCollectGold()
+
 		DataService.Client.DataChanged:Fire(player, data)
 		EnclosureService.Client.GoldCollected:Fire(player)
+		
 		print(`{player.Name} collected {amount} Gold!`)
 	end
 end

@@ -8,6 +8,10 @@ local Roact = require(ReplicatedStorage.Packages.Roact)
 local RoactHooks = require(ReplicatedStorage.Packages.Hooks)
 local RoduxHooks = require(ReplicatedStorage.Packages.Roduxhooks)
 
+-- UI
+local Store = require(StarterPlayerScripts.Client.Rodux.Store)
+local UIActions = require(StarterPlayerScripts.Client.Rodux.Actions.UIActions)
+
 -- Data
 local ColorPallete = require(ReplicatedStorage.Shared.Data.ColorPallete)
 local Eggs = require(ReplicatedStorage.Shared.Data.Shop.Eggs)
@@ -33,19 +37,32 @@ function EggsPanel(props, hooks)
 
 	local eggCards = {}
 	for _, egg in ipairs(eggList) do
+		local amountOwned = eggsState[egg.Id] or 0
+		local hasEgg = amountOwned > 0
+
 		eggCards[egg.Id] = Roact.createElement(EggCard, {
 			Id = egg.Id,
 			Name = egg.Name,
 			Description = egg.Description,
 			Price = egg.Price,
 			Image = egg.Image,
-			Owned = eggsState[egg.Id] or 0,
+			Owned = amountOwned,
 			LayoutOrder = egg.LayoutOrder,
 			Action = {
-				Label = `Hatch`,
+				Label = hasEgg and "Hatch" or "Purchase",
 				OnClick = function()
-					EggController:HatchEgg(egg.Id)
-					Knit.GetController("AudioController"):PlaySFX("UI_Click")
+					local AudioController = Knit.GetController("AudioController")
+					
+					if hasEgg then
+						EggController:HatchEgg(egg.Id)
+						AudioController:PlaySFX("UI_Purchase")
+
+						Knit.GetController("QuestController"):CompleteHatchEgg()
+					else
+						Store:dispatch(UIActions.SetCurrentUI("Shop"))
+						Store:dispatch(UIActions.SetCurrentTab("Eggs"))
+						AudioController:PlaySFX("UI_Click")
+					end
 				end,
 			},
 		})

@@ -22,5 +22,17 @@ return {
 		}
 	},
 	Animals = {},
-	Placements = {}
+	Placements = {},
+	Tutorial = {
+		Completed = false,
+		CurrentStep = 1,
+		Steps = {
+			[1] = "Visit the Shop",
+			[2] = "Purchase a Biome",
+			[3] = "Go to Zoo",
+			[4] = "Place a Biome from Inventory",
+			[5] = "Hatch an Egg from Inventory",
+			[6] = "Place an Animal to Biome"
+		}
+	},
 }
